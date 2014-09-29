@@ -11,51 +11,54 @@ import UIKit
 extension UIImage {
 
     func hnk_imageByScalingToSize(toSize: CGSize) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(toSize, !hnk_hasAlpha(), 0.0)
-        drawInRect(CGRectMake(0, 0, toSize.width, toSize.height))
+        UIGraphicsBeginImageContextWithOptions(toSize, !hnk_hasAlpha, 0.0)
+        drawInRect(CGRect(origin: CGPointZero, size: toSize))
         let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return resizedImage
     }
-
-    func hnk_hasAlpha() -> Bool {
-        let alpha = CGImageGetAlphaInfo(self.CGImage)
-        switch alpha {
-        case .First, .Last, .PremultipliedFirst, .PremultipliedLast, .Only:
-            return true
-        case .None, .NoneSkipFirst, .NoneSkipLast:
-            return false
+    
+    var hnk_hasAlpha: Bool {
+        if let cgImage = CGImage {
+            switch CGImageGetAlphaInfo(cgImage) {
+            case .First, .Last, .PremultipliedFirst, .PremultipliedLast, .Only:
+                return true
+            case .None, .NoneSkipFirst, .NoneSkipLast:
+                return false
+            }
         }
+        return (CIImage != nil)
     }
     
     func hnk_data(compressionQuality: Float = 1.0) -> NSData! {
-        let hasAlpha = self.hnk_hasAlpha()
+        let hasAlpha = self.hnk_hasAlpha
         let data = hasAlpha ? UIImagePNGRepresentation(self) : UIImageJPEGRepresentation(self, CGFloat(compressionQuality))
         return data
     }
     
     func hnk_decompressedImage() -> UIImage {
-        let originalImageRef = self.CGImage
+        let originalImageRef = CGImage
         let originalBitmapInfo = CGImageGetBitmapInfo(originalImageRef)
-        let alphaInfo = CGImageGetAlphaInfo(originalImageRef)
         
         // See: http://stackoverflow.com/questions/23723564/which-cgimagealphainfo-should-we-use
-        var bitmapInfo = originalBitmapInfo;
-        switch (alphaInfo) {
+        var alphaInfo: CGImageAlphaInfo
+        switch (CGImageGetAlphaInfo(originalImageRef)) {
         case .None:
-            bitmapInfo &= ~CGBitmapInfo.AlphaInfoMask
-            bitmapInfo |= CGBitmapInfo.fromMask(CGImageAlphaInfo.NoneSkipFirst.toRaw())
+            alphaInfo = .NoneSkipFirst
         case .PremultipliedFirst, .PremultipliedLast, .NoneSkipFirst, .NoneSkipLast:
-            break
+            alphaInfo = .PremultipliedFirst
         case .Only, .Last, .First: // Unsupported
             return self
         }
         
+        let bitmapInfo = CGBitmapInfo(alphaInfo.toRaw()) | .ByteOrder32Little
+        
+        //kCGImageAlphaPremultipliedFirst
         let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let pixelSize = CGSizeMake(self.size.width * self.scale, self.size.height * self.scale);
-        if let context = CGBitmapContextCreate(nil, UInt(pixelSize.width), UInt(pixelSize.height), CGImageGetBitsPerComponent(originalImageRef), 0, colorSpace, bitmapInfo) {
+        let pixelSize = CGSize(width: size.width * scale, height: size.height * scale)
+        if let context = CGBitmapContextCreate(nil, UInt(pixelSize.width), UInt(pixelSize.height), 8, 0, colorSpace, bitmapInfo) {
+            let imageRect = CGRect(origin: CGPointZero, size: pixelSize)
             
-            let imageRect = CGRectMake(0, 0, pixelSize.width, pixelSize.height);
             UIGraphicsPushContext(context)
             
             // Flip coordinate system. See: http://stackoverflow.com/questions/506622/cgcontextdrawimage-draws-image-upside-down-when-passed-uiimage-cgimage
@@ -63,18 +66,61 @@ extension UIImage {
             CGContextScaleCTM(context, 1.0, -1.0)
             
             // UIImage and drawInRect takes into account image orientation, unlike CGContextDrawImage.
-            self.drawInRect(imageRect)
+            drawInRect(imageRect)
             UIGraphicsPopContext()
-            let decompressedImageRef = CGBitmapContextCreateImage(context);
             
-            let scale = UIScreen.mainScreen().scale;
-            let image = UIImage(CGImage: decompressedImageRef, scale:scale, orientation:UIImageOrientation.Up);
-            
-            return image;
-            
+            let decompressedImageRef = CGBitmapContextCreateImage(context)
+            return UIImage(CGImage: decompressedImageRef, scale: scale, orientation:UIImageOrientation.Up)
         } else {
             return self
         }
     }
     
 }
+
+extension UIImage: Decompressible {
+
+    public func asDecompressedValue() -> Self {
+        let originalImageRef = CGImage
+        let originalBitmapInfo = CGImageGetBitmapInfo(originalImageRef)
+        
+        // See: http://stackoverflow.com/questions/23723564/which-cgimagealphainfo-should-we-use
+        var alphaInfo: CGImageAlphaInfo
+        switch (CGImageGetAlphaInfo(originalImageRef)) {
+        case .None:
+            alphaInfo = .NoneSkipFirst
+        case .PremultipliedFirst, .PremultipliedLast, .NoneSkipFirst, .NoneSkipLast:
+            alphaInfo = .PremultipliedFirst
+        case .Only, .Last, .First: // Unsupported
+            return self
+        }
+        
+        let bitmapInfo = CGBitmapInfo(alphaInfo.toRaw()) | .ByteOrder32Little
+        
+        //kCGImageAlphaPremultipliedFirst
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let pixelSize = CGSize(width: size.width * scale, height: size.height * scale)
+        if let context = CGBitmapContextCreate(nil, UInt(pixelSize.width), UInt(pixelSize.height), 8, 0, colorSpace, bitmapInfo) {
+            let imageRect = CGRect(origin: CGPointZero, size: pixelSize)
+            
+            UIGraphicsPushContext(context)
+            
+            // Flip coordinate system. See: http://stackoverflow.com/questions/506622/cgcontextdrawimage-draws-image-upside-down-when-passed-uiimage-cgimage
+            CGContextTranslateCTM(context, 0, pixelSize.height)
+            CGContextScaleCTM(context, 1.0, -1.0)
+            
+            // UIImage and drawInRect takes into account image orientation, unlike CGContextDrawImage.
+            drawInRect(imageRect)
+            UIGraphicsPopContext()
+            
+            let decompressedImageRef = CGBitmapContextCreateImage(context)
+            return self.dynamicType(CGImage: decompressedImageRef, scale: scale, orientation:UIImageOrientation.Up)
+        } else {
+            return self
+        }
+    }
+    
+}
+
+
+

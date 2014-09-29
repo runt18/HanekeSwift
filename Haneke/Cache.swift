@@ -17,17 +17,34 @@ class ObjectWrapper : NSObject {
     }
 }
 
+final class Box<T>: NSObject {
+    let boxed: [T]
+    
+    init(value: T) {
+        self.boxed = [value]
+    }
+    
+    var value: T {
+        return boxed[0]
+    }
+    
+}
+
 extension Haneke {
-        // It'd be better to define this in the NetworkFetcher class but Swift doesn't allow to declare an enum in a generic type
-        public enum CacheError : Int {
-            case ObjectNotFound = -100
-            case FormatNotFound = -101
+    // It'd be better to define this in the NetworkFetcher class but Swift doesn't allow to declare an enum in a generic type
+    public enum CacheError : Int, ErrorRepresentable {
+        case ObjectNotFound = -100
+        case FormatNotFound = -101
+        
+        static var domain: String {
+            return Haneke.Domain
         }
+    }
 }
 
 public let OriginalFormatName = "original"
 
-public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentable> {
+public class Cache<T: DataConvertible where T.Result == T> {
     
     let name : String
     
@@ -46,7 +63,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
             }
         )
         
-        var originalFormat = Format<T>(OriginalFormatName, diskCapacity : UINT64_MAX)
+        var originalFormat = Format<T>(OriginalFormatName, diskCapacity : Int.max)
         self.addFormat(originalFormat)
     }
     
@@ -88,16 +105,16 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
         } else if let block = doFailure {
             let localizedFormat = NSLocalizedString("Format %@ not found", comment: "Error description")
             let description = String(format:localizedFormat, formatName)
-            let error = Haneke.errorWithCode(Haneke.CacheError.FormatNotFound.toRaw(), description: description)
+            let error = errorWithCode(Haneke.CacheError.FormatNotFound, description: description)
             block(error)
         }
         return false
     }
     
-    public func fetchValueForFetcher(fetcher : Fetcher<T>, formatName : String = OriginalFormatName, success doSuccess : (T) -> (), failure doFailure : ((NSError?) -> ())? = nil) -> Bool {
+    public func fetchValueForFetcher<U: Fetcher where U.Fetched == T>(fetcher: U, formatName : String = OriginalFormatName, success doSuccess : (T) -> (), failure doFailure : ((NSError?) -> ())? = nil) -> Bool {
         let key = fetcher.key
         let didSuccess = self.fetchValueForKey(key, formatName: formatName,  success: doSuccess, failure: { error in
-            if error?.code == Haneke.CacheError.FormatNotFound.toRaw() {
+            if errorIs(error, code: Haneke.CacheError.FormatNotFound) {
                 doFailure?(error)
                 return
             }
@@ -135,7 +152,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
     
     // MARK: Formats
 
-    var formats : [String : (Format<T>, NSCache, DiskCache)] = [:]
+    var formats = [String : (Format<T>, NSCache, DiskCache)]()
     
     public func addFormat(format : Format<T>) {
         let name = self.name
@@ -164,7 +181,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
                 if (error?.code == NSFileReadNoSuchFileError) {
                     let localizedFormat = NSLocalizedString("Object not found for key %@", comment: "Error description")
                     let description = String(format:localizedFormat, key)
-                    let error = Haneke.errorWithCode(Haneke.CacheError.ObjectNotFound.toRaw(), description: description)
+                    let error = errorWithCode(Haneke.CacheError.ObjectNotFound, description: description)
                     block(error)
                 } else {
                     block(error)
@@ -173,24 +190,23 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
         })
     }
     
-    private func fetchValueFromFetcher(fetcher : Fetcher<T>, format : Format<T>, success doSuccess : (T) -> (), failure doFailure : ((NSError?) -> ())?) {
-        fetcher.fetchWithSuccess(success: { value in
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-                var formatted = format.apply(value)
-                
-                if let formattedImage = formatted as? UIImage {
-                    let originalImage = value as? UIImage
-                    if formattedImage === originalImage {
-                        formatted = self.decompressedImageIfNeeded(formatted)
-                    }
+    private func fetchValueFromFetcher<U: Fetcher where U.Fetched == T>(fetcher: U, format : Format<T>, success doSuccess : (T) -> (), failure doFailure : ((NSError?) -> ())?) {
+        fetcher.fetchWithSuccess(success: { (value: T) in
+            var formatted = format.apply(value)
+            
+            if let formattedImage = formatted as? UIImage {
+                let originalImage = value as? UIImage
+                if formattedImage === originalImage {
+                    formatted = self.decompressedImageIfNeeded(formatted)
                 }
-
-                dispatch_async(dispatch_get_main_queue(), {
-                    doSuccess(formatted)
-                    self.setValue(formatted, fetcher.key, formatName: format.name)
-                })
-            })
-        }, failure: { error in
+            }
+            
+            self.setValue(formatted, fetcher.key, formatName: format.name)
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                doSuccess(formatted)
+            }
+        }, failure: { (error: NSError?) -> () in
             let _ = doFailure?(error)
         })
     }
@@ -205,3 +221,5 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
     }
     
 }
+
+//private func fetchValueForCacheFromFetcher<

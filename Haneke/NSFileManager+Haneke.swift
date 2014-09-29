@@ -9,59 +9,33 @@
 import Foundation
 
 extension NSFileManager {
-
-    func enumerateContentsOfDirectoryAtPath(path : String, orderedByProperty property : String, ascending : Bool, usingBlock block : (NSURL, Int, inout Bool) -> Void ) {
-
-        let directoryURL = NSURL(fileURLWithPath: path)
+    public func enumerateContentsOfDirectoryAtURL(URL: NSURL) -> SequenceOf<NSURL> {
         var error : NSError?
-        if let contents = self.contentsOfDirectoryAtURL(directoryURL, includingPropertiesForKeys: [property], options: NSDirectoryEnumerationOptions.allZeros, error: &error) as? [NSURL] {
-
+        if let contents = self.contentsOfDirectoryAtURL(URL, includingPropertiesForKeys: nil, options: nil, error: &error) as? [NSURL] {
+            return SequenceOf(contents)
+        }
+        println("Failed to list directory with error \(error)")
+        return SequenceOf([])
+    }
+    
+    public func enumerateContentsOfDirectoryAtURL<T : Comparable>(URL: NSURL, byProperty property: String, isOrderedBefore comparator: (T, T) -> Bool) -> SequenceOf<NSURL> {
+        var error : NSError?
+        if let contents = self.contentsOfDirectoryAtURL(URL, includingPropertiesForKeys: [property], options: nil, error: &error) as? [NSURL] {
             let sortedContents = contents.sorted({(URL1 : NSURL, URL2 : NSURL) -> Bool in
-
-                // Maybe there's a better way to do this. See: http://stackoverflow.com/questions/25502914/comparing-anyobject-in-swift
-
                 var value1 : AnyObject?
                 if !URL1.getResourceValue(&value1, forKey: property, error: nil) { return true }
                 var value2 : AnyObject?
                 if !URL2.getResourceValue(&value2, forKey: property, error: nil) { return false }
-
-
-                if let string1 = value1 as? String {
-                    if let string2 = value2 as? String {
-                        return ascending ? string1 < string2 : string2 < string1
-                    }
+                let comp1 = value1 as? T
+                let comp2 = value2 as? T
+                if comp1 == nil || comp2 == nil {
+                    return false
                 }
-                if let date1 = value1 as? NSDate {
-                    if let date2 = value2 as? NSDate {
-                        return ascending ? date1 < date2 : date2 < date1
-                    }
-                }
-
-                if let number1 = value1 as? NSNumber {
-                    if let number2 = value2 as? NSNumber {
-                        return ascending ? number1 < number2 : number2 < number1
-                    }
-                }
-
-                return false
+                return comparator(comp1!, comp2!)
             })
-
-            for (i, v) in enumerate(sortedContents) {
-                var stop : Bool = false
-                block(v, i, &stop)
-                if stop { break }
-            }
-        } else {
-            NSLog("Failed to list directory with error \(error)")
+            return SequenceOf(sortedContents)
         }
+        println("Failed to list directory with error \(error)")
+        return SequenceOf([])
     }
-
-}
-
-func < (lhs: NSDate, rhs: NSDate) -> Bool {
-    return lhs.compare(rhs) == NSComparisonResult.OrderedAscending
-}
-
-func < (lhs: NSNumber, rhs: NSNumber) -> Bool {
-    return lhs.compare(rhs) == NSComparisonResult.OrderedAscending
 }

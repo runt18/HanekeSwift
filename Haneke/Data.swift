@@ -7,24 +7,28 @@
 //
 
 import UIKit
+import Swift
 
 // See: http://stackoverflow.com/questions/25922152/not-identical-to-self
 public protocol DataConvertible {
     typealias Result
     
-    class func convertFromData(data:NSData) -> Result?
-}
-
-public protocol DataRepresentable {
+    class func convertFromData(data: NSData) -> Result?
     
     func asData() -> NSData!
 }
 
-extension UIImage : DataConvertible, DataRepresentable {
+public protocol Decompressible: class {
+    
+    func asDecompressedValue() -> Self
+    
+}
+
+extension UIImage: DataConvertible {
     
     public typealias Result = UIImage
     
-    public class func convertFromData(data:NSData) -> Result? {
+    public class func convertFromData(data:NSData) -> UIImage? {
         let image : UIImage? = UIImage(data: data) // Workaround for initializer that might return nil
         return image
     }
@@ -35,7 +39,7 @@ extension UIImage : DataConvertible, DataRepresentable {
     
 }
 
-extension String : DataConvertible, DataRepresentable {
+extension String: DataConvertible {
     
     public typealias Result = String
     
@@ -50,7 +54,7 @@ extension String : DataConvertible, DataRepresentable {
     
 }
 
-extension NSData : DataConvertible, DataRepresentable {
+extension NSData: DataConvertible {
     
     public typealias Result = NSData
     

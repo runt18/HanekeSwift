@@ -7,35 +7,33 @@
 //
 
 import UIKit
+import Swift
 
-// See: http://stackoverflow.com/questions/25915306/generic-closure-in-protocol
-public class Fetcher<T : DataConvertible> {
-
-    let key : String
+public protocol Fetcher {
+    typealias Fetched
     
-    init(key : String) {
-        self.key = key
-    }
+    var key: String { get }
     
-    func fetchWithSuccess(success doSuccess : (T.Result) -> (), failure doFailure : ((NSError?) -> ())) {}
-    
-    func cancelFetch() {}
+    func fetchWithSuccess(success doSuccess : (Fetched) -> (), failure doFailure : ((NSError?) -> ()))
+    func cancelFetch()
 }
 
-class SimpleFetcher<T : DataConvertible> : Fetcher<T> {
-    
+public struct SimpleFetcher<T : DataConvertible> : Fetcher {
+    typealias Fetched = T.Result
+
+    public let key: String
     let getThing : () -> T.Result
     
     init(key : String, thing getThing : @autoclosure () -> T.Result) {
         self.getThing = getThing
-        super.init(key: key)
+        self.key = key
     }
     
-    override func fetchWithSuccess(success doSuccess : (T.Result) -> (), failure doFailure : ((NSError?) -> ())) {
+    public func fetchWithSuccess(success doSuccess : (T.Result) -> (), failure doFailure : ((NSError?) -> ())) {
         let thing = getThing()
         doSuccess(thing)
     }
     
-    override func cancelFetch() {}
+    public func cancelFetch() {}
     
 }

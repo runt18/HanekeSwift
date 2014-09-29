@@ -107,7 +107,7 @@ class CacheTests: DiskTestCase {
         let sut = self.sut!
         let key = self.name
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        var format = Format<UIImage>(self.name, diskCapacity: UINT64_MAX)
+        var format = Format<UIImage>(self.name, diskCapacity: Int.max)
         sut.addFormat(format)
         let expectation = self.expectationWithDescription("fetch image")
         
@@ -163,9 +163,8 @@ class CacheTests: DiskTestCase {
             XCTFail("expected failure")
             expectation.fulfill()
         }, failure : { error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
-            XCTAssertEqual(error!.code, Haneke.CacheError.ObjectNotFound.toRaw())
-            XCTAssertNotNil(error!.localizedDescription)
+            XCTAssertTrue(errorIs(error, code: Haneke.CacheError.ObjectNotFound))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         })
         
@@ -181,9 +180,8 @@ class CacheTests: DiskTestCase {
             XCTFail("expected failure")
             expectation.fulfill()
         }, failure : { error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
-            XCTAssertEqual(error!.code, Haneke.CacheError.FormatNotFound.toRaw())
-            XCTAssertNotNil(error!.localizedDescription)
+            XCTAssertTrue(errorIs(error, code: Haneke.CacheError.FormatNotFound))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         })
         
@@ -276,9 +274,8 @@ class CacheTests: DiskTestCase {
             XCTFail("expected failure")
             expectation.fulfill()
         }, failure : { error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
-            XCTAssertEqual(error!.code, Haneke.CacheError.FormatNotFound.toRaw())
-            XCTAssertNotNil(error!.localizedDescription)
+            XCTAssertTrue(errorIs(error, code: Haneke.CacheError.FormatNotFound))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         })
         
@@ -403,7 +400,7 @@ class CacheTests: DiskTestCase {
     func testUIApplicationDidReceiveMemoryWarningNotification() {
         let expectation = expectationWithDescription("onMemoryWarning")
         
-        class CacheMock<T : DataConvertible where T.Result == T, T : DataRepresentable> : Cache<T> {
+        class CacheMock<T : DataConvertible where T.Result == T> : Cache<T> {
             
             var expectation : XCTestExpectation?
             

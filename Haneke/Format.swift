@@ -16,13 +16,13 @@ public struct Format<T> {
     
     public let name : String
     
-    public let diskCapacity : UInt64
+    public let diskCapacity : Int
     
     public var transform : ((T) -> (T))?
     
     public var convertToData : (T -> NSData)?
 
-    public init(_ name : String, diskCapacity : UInt64 = 0, transform : ((T) -> (T))? = nil) {
+    public init(_ name : String, diskCapacity : Int = 0, transform : ((T) -> (T))? = nil) {
         self.name = name
         self.diskCapacity = diskCapacity
         self.transform = transform

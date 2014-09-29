@@ -26,12 +26,12 @@ class UIImage_HanekeTests: XCTestCase {
 
     func testHasAlphaTrue() {
         let image = UIImage.imageWithColor(UIColor.redColor(), CGSize(width: 1, height: 1), false)
-        XCTAssertTrue(image.hnk_hasAlpha())
+        XCTAssertTrue(image.hnk_hasAlpha)
     }
     
     func testHasAlphaFalse() {
         let image = UIImage.imageWithColor(UIColor.redColor(), CGSize(width: 1, height: 1), true)
-        XCTAssertFalse(image.hnk_hasAlpha())
+        XCTAssertFalse(image.hnk_hasAlpha)
     }
     
     func testDataPNG() {

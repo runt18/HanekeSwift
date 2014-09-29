@@ -9,31 +9,35 @@
 import XCTest
 
 class DiskTestCase : XCTestCase {
- 
-    lazy var directoryPath : String = {
-        var directoryPath = NSHomeDirectory()
-        directoryPath = directoryPath.stringByAppendingPathComponent(_stdlib_getTypeName(self))
-        return directoryPath
-    }()
+    internal lazy var fileManager: NSFileManager! = NSFileManager()
     
     override func setUp() {
         super.setUp()
-        NSFileManager.defaultManager().createDirectoryAtPath(directoryPath, withIntermediateDirectories: true, attributes: nil, error: nil)
+        fileManager.createDirectoryAtURL(directoryURL, withIntermediateDirectories: true, attributes: nil, error: nil)
     }
     
     override func tearDown() {
-        NSFileManager.defaultManager().removeItemAtPath(directoryPath, error: nil)
+        fileManager.removeItemAtURL(directoryURL, error: nil)
+        fileManager = nil
         super.tearDown()
     }
-    
+ 
+    lazy var directoryURL : NSURL! = {
+        let directoryURL = self.fileManager.URLForDirectory(.AutosavedInformationDirectory, inDomain: .UserDomainMask, appropriateForURL: nil, create: true, error: nil)
+        return directoryURL?.URLByAppendingPathComponent(_stdlib_getTypeName(self), isDirectory: true)
+    }()
+
     var dataIndex = 0
     
-    func writeDataWithLength(length : Int) -> String {
+    func writeDataWithLength(length : Int, directory : NSURL) -> NSURL {
         let data = NSData.dataWithLength(length)
-        let path = self.directoryPath.stringByAppendingPathComponent("\(dataIndex)")
-        data.writeToFile(path, atomically: true)
+        let URL = directory.URLByAppendingPathComponent("\(dataIndex)", isDirectory: false)
+        data.writeToURL(URL, atomically: true)
         dataIndex++
-        return path
+        return URL
     }
     
+    func writeDataWithLength(length : Int) -> NSURL {
+        return writeDataWithLength(length, directory: directoryURL)
+    }
 }

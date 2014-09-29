@@ -8,26 +8,57 @@
 
 import UIKit
 import ObjectiveC
+import Swift
+
+public extension NSMapTable {
+    
+    subscript (key: AnyObject) -> AnyObject? {
+        get {
+            return objectForKey(key)
+        }
+        
+        set (newValue) {
+            if let newValue: AnyObject = newValue {
+                setObject(newValue, forKey: key)
+            } else {
+                removeObjectForKey(key)
+            }
+        }
+    }
+
+}
 
 public extension Haneke {
     public struct UIKit {
+        
         public struct DefaultFormat {
-            public static let DiskCapacity : UInt64 = 10 * 1024 * 1024
+            public static let DiskCapacity : Int = 10 * 1024 * 1024
             public static let CompressionQuality : Float = 0.75
         }
-        static var fetcherKey = 0
-        static var associatedFetchers = [COpaquePointer: Fetcher<UIImage>]()
+        
+        static var associatedFetchers = NSMapTable.weakToStrongObjectsMapTable()
+        
     }
 }
 
 public extension UIImageView {
-    
+
     public var hnk_format : Format<UIImage> {
         let viewSize = self.bounds.size
             assert(viewSize.width > 0 && viewSize.height > 0, "[\(reflect(self).summary) \(__FUNCTION__)]: UImageView size is zero. Set its frame, call sizeToFit or force layout first.")
             let scaleMode = self.hnk_scaleMode
             return UIImageView.hnk_formatWithSize(viewSize, scaleMode: scaleMode)
     }
+    
+    func hnk_fetcher<T: Fetcher where T.Fetched == UIImage>() -> T? {
+        return nil
+    }
+    
+    /*public var hnk_testFetcher: Box<Fetcher>? {
+        return nil
+    }*/
+    
+    /*
     
     public func hnk_setImageFromURL(URL: NSURL, placeholder : UIImage? = nil, success doSuccess : ((UIImage) -> ())? = nil, failure doFailure : ((NSError?) -> ())? = nil) {
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
@@ -62,17 +93,23 @@ public extension UIImageView {
     }
     
     // MARK: Internal
+    */
     
+    /*var hnk_fetcher: Fetcher! {
+        return nil
+    }*/
+    
+    /*
     // See: http://stackoverflow.com/questions/25907421/associating-swift-things-with-nsobject-instances
     var hnk_fetcher : Fetcher<UIImage>! {
         get {
-            return Haneke.UIKit.associatedFetchers[self.hnk_pointer]
+            return Haneke.UIKit.associatedFetchers[self] as Fetcher<UIImage>!
         }
+        
         set (fetcher) {
-            NSObject.hnk_setDeinitObserverIfNeeded(self)
-            Haneke.UIKit.associatedFetchers[self.hnk_pointer] = fetcher
+            Haneke.UIKit.associatedFetchers[self] = fetcher
         }
-    }
+    }*/
     
     var hnk_scaleMode : ScaleMode {
         switch (self.contentMode) {
@@ -108,6 +145,7 @@ public extension UIImageView {
         return format
     }
     
+    /*
     func hnk_fetchImageForFetcher(fetcher : Fetcher<UIImage>, success doSuccess : ((UIImage) -> ())?, failure doFailure : ((NSError?) -> ())?) -> Bool {
         let format = self.hnk_format
         let cache = Haneke.sharedImageCache
@@ -147,15 +185,8 @@ public extension UIImageView {
     func hnk_shouldCancelForKey(key:String) -> Bool {
         if self.hnk_fetcher?.key == key { return false }
         
-        NSLog("Cancelled set image for \(key.lastPathComponent)")
+        println("Cancelled set image for \(key.lastPathComponent)")
         return true
-    }
+    }*/
     
-}
-
-extension UIImageView : HasAssociatedSwift {
-    
-    func hnk_clearSwiftAssociations() {
-        Haneke.UIKit.associatedFetchers[self.hnk_pointer] = nil
-    }
 }

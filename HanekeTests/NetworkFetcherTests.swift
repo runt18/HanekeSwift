@@ -105,10 +105,9 @@ class NetworkFetcherTests: XCTestCase {
         sut.fetchWithSuccess(success: {_ in
             XCTFail("expected failure")
             expectation.fulfill()
-        }) {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcher.ErrorCode.InvalidData.toRaw())
-            XCTAssertNotNil($0!.localizedDescription)
+        }) { error in
+            XCTAssertTrue(errorIs(error, code: Haneke.NetworkError.InvalidData))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }
         
@@ -127,10 +126,9 @@ class NetworkFetcherTests: XCTestCase {
         sut.fetchWithSuccess(success: {_ in
             XCTFail("expected failure")
             expectation.fulfill()
-        }) {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcher.ErrorCode.MissingData.toRaw())
-            XCTAssertNotNil($0!.localizedDescription)
+        }) { error in
+            XCTAssertTrue(errorIs(error, code: Haneke.NetworkError.MissingData))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }
         
@@ -178,10 +176,9 @@ class NetworkFetcherTests: XCTestCase {
         sut.fetchWithSuccess(success: {_ in
             XCTFail("expected failure")
             expectation.fulfill()
-        }) {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcher.ErrorCode.InvalidStatusCode.toRaw())
-            XCTAssertNotNil($0!.localizedDescription)
+        }) { error in
+            XCTAssertTrue(errorIs(error, code: Haneke.NetworkError.InvalidStatusCode))
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }
         

@@ -9,48 +9,52 @@
 import UIKit
 
 extension Haneke {
-    public struct NetworkFetcher {
-        // It'd be better to define this in the NetworkFetcher class but Swift doesn't allow to declare an enum in a generic type
-        public enum ErrorCode : Int {
-            case InvalidData = -400
-            case MissingData = -401
-            case InvalidStatusCode = -402
+    // It'd be better to define this in the NetworkFetcher class but Swift doesn't allow to declare an enum in a generic type
+    public enum NetworkError : Int, ErrorRepresentable {
+        case InvalidData = -400
+        case MissingData = -401
+        case InvalidStatusCode = -402
+        
+        static var domain: String {
+            return Haneke.Domain + ".network"
         }
     }
 }
 
-public class NetworkFetcher<T : DataConvertible> : Fetcher<T> {
-    
+public class NetworkFetcher<T : DataConvertible> : Fetcher {
+    typealias Fetched = T.Result
+
     let URL : NSURL
     
     public init(URL : NSURL) {
         self.URL = URL
-
-        let key =  URL.absoluteString!
-        super.init(key: key)
     }
     
+    public var key: String {
+        return URL.absoluteString!
+    }
+
     public var session : NSURLSession { return NSURLSession.sharedSession() }
     
-    var task : NSURLSessionDataTask? = nil
+    var task: NSURLSessionDataTask?
     
     var cancelled = false
     
     // MARK: Fetcher
     
-    public override func fetchWithSuccess(success doSuccess : (T.Result) -> (), failure doFailure : ((NSError?) -> ())) {
-        self.cancelled = false
-        self.task = self.session.dataTaskWithURL(self.URL) {[weak self] (data : NSData!, response : NSURLResponse!, error : NSError!) -> Void in
+    public func fetchWithSuccess(success doSuccess : (T.Result) -> (), failure doFailure : ((NSError?) -> ())) {
+        cancelled = false
+        task = self.session.dataTaskWithURL(self.URL) {[weak self] (data : NSData!, response : NSURLResponse!, error : NSError!) -> Void in
             if let strongSelf = self {
                 strongSelf.onReceiveData(data, response: response, error: error, success: doSuccess, failure: doFailure)
             }
         }
-        self.task?.resume()
+        task?.resume()
     }
     
-    public override func cancelFetch() {
-        self.task?.cancel()
-        self.cancelled = true
+    public func cancelFetch() {
+        task?.cancel()
+        cancelled = true
     }
     
     // MARK: Private
@@ -97,13 +101,16 @@ public class NetworkFetcher<T : DataConvertible> : Fetcher<T> {
             return
         }
 
-        dispatch_async(dispatch_get_main_queue()) { doSuccess(thing!) }
-
+        dispatch_async(dispatch_get_main_queue()) {
+            doSuccess(thing!)
+        }
     }
     
-    private func failWithCode(code : Haneke.NetworkFetcher.ErrorCode, localizedDescription : String, failure doFailure : ((NSError?) -> ())) {
+    private func failWithCode(code: Haneke.NetworkError, localizedDescription : String, failure doFailure : ((NSError?) -> ())) {
         // TODO: Log error in debug mode
-        let error = Haneke.errorWithCode(code.toRaw(), description: localizedDescription)
-        dispatch_async(dispatch_get_main_queue()) { doFailure(error) }
+        let error = errorWithCode(code, description: localizedDescription)
+        dispatch_async(dispatch_get_main_queue()) {
+            doFailure(error)
+        }
     }
 }

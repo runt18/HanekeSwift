@@ -332,7 +332,7 @@ class UIImageView_HanekeTests: DiskTestCase {
     // MARK: setImageFromFile
     
     func testSetImageFromFile_MemoryMiss() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         
         sut.hnk_setImageFromFile(fetcher.key)
         
@@ -342,7 +342,7 @@ class UIImageView_HanekeTests: DiskTestCase {
     
     func testSetImageFromFile_MemoryHit() {
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let expectedImage = setImage(image, key: fetcher.key)
         
         sut.hnk_setImageFromFile(fetcher.key)
@@ -353,7 +353,7 @@ class UIImageView_HanekeTests: DiskTestCase {
     
     func testSetImageFromFileSuccessFailure_MemoryHit() {
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let expectedImage = setImage(image, key: fetcher.key)
         
         sut.hnk_setImageFromFile(fetcher.key, failure: {error in

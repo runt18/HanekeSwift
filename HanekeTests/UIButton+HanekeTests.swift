@@ -105,7 +105,7 @@ class UIButton_HanekeTests: DiskTestCase {
     // MARK: setImageFromFile
     
     func testSetImageFromFile_MemoryMiss_UIControlStateSelected() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         
         sut.hnk_setImageFromFile(fetcher.key, state: .Selected)
         
@@ -115,7 +115,7 @@ class UIButton_HanekeTests: DiskTestCase {
     
     func testSetImageFromFile_MemoryHit_UIControlStateNormal() {
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let expectedImage = setImage(image, key: fetcher.key, format: sut.hnk_imageFormat)
         
         sut.hnk_setImageFromFile(fetcher.key)
@@ -126,7 +126,7 @@ class UIButton_HanekeTests: DiskTestCase {
     
     func testSetImageFromFileSuccessFailure_MemoryHit_UIControlStateSelected() {
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let cache = Haneke.sharedImageCache
         let format = sut.hnk_imageFormat
         cache.set(value: image, key: fetcher.key, formatName: format.name)
@@ -376,7 +376,7 @@ class UIButton_HanekeTests: DiskTestCase {
     // MARK: setBackgroundImageFromFile
     
     func testSetBackgroundImageFromFile_MemoryMiss_UIControlStateSelected() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         
         sut.hnk_setBackgroundImageFromFile(fetcher.key, state: .Selected)
         
@@ -386,7 +386,7 @@ class UIButton_HanekeTests: DiskTestCase {
     
     func testSetBackgroundImageFromFile_MemoryHit_UIControlStateNormal() {
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let expectedImage = setImage(image, key: fetcher.key, format: sut.hnk_backgroundImageFormat)
         
         sut.hnk_setBackgroundImageFromFile(fetcher.key)
@@ -398,7 +398,7 @@ class UIButton_HanekeTests: DiskTestCase {
     
     func testSetBackgroundImageFromFileSuccessFailure_MemoryHit_UIControlStateSelected() {
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePath())
+        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
         let cache = Haneke.sharedImageCache
         let format = sut.hnk_backgroundImageFormat
         cache.set(value: image, key: fetcher.key, formatName: format.name)

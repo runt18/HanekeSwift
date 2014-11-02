@@ -9,40 +9,95 @@
 import XCTest
 
 class DiskTestCase : XCTestCase {
- 
-    lazy var directoryPath : String = {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-        let directoryPath = documentsPath.stringByAppendingPathComponent(self.name)
-        return directoryPath
+
+    let fileManager = NSFileManager()
+
+    lazy var directoryURL: NSURL = {
+        let directoryURL = self.fileManager.URLForDirectory(.AutosavedInformationDirectory, inDomain: .UserDomainMask, appropriateForURL: nil, create: true, error: nil)
+        return directoryURL!.URLByAppendingPathComponent(self.name, isDirectory: true)
     }()
+
+    var directoryPathOld: String {
+        return directoryURL.path!
+    }
     
     override func setUp() {
         super.setUp()
-        NSFileManager.defaultManager().createDirectoryAtPath(directoryPath, withIntermediateDirectories: true, attributes: nil, error: nil)
+
+        fileManager.createDirectoryAtURL(directoryURL, withIntermediateDirectories: true, attributes: nil, error: nil)
     }
     
     override func tearDown() {
-        NSFileManager.defaultManager().removeItemAtPath(directoryPath, error: nil)
+        fileManager.removeItemAtURL(directoryURL, error: nil)
+
         super.tearDown()
     }
     
-    var dataIndex = 0
+    // Mark: Data writing
+
+    private var dataIndex = 0
+
+    func uniqueURL(inDirectory directory: NSURL) -> NSURL {
+        let URL = directory.URLByAppendingPathComponent("\(dataIndex)", isDirectory: false)
+        dataIndex++
+        return URL
+    }
+
+    func uniqueURL() -> NSURL {
+        return uniqueURL(inDirectory: directoryURL)
+    }
+
+    func writeData(data: NSData, toDirectory directory: NSURL) -> NSURL {
+        let URL = uniqueURL(inDirectory: directory)
+        data.writeToURL(URL, atomically: true)
+        return URL
+    }
     
-    func writeDataWithLength(length : Int) -> String {
+    func writeData(data: NSData) -> NSURL {
+        return writeData(data, toDirectory: directoryURL)
+    }
+
+    func writeDataWithLength(length : Int, inDirectory : NSURL) -> NSURL {
         let data = NSData.dataWithLength(length)
-        return self.writeData(data)
+        return writeData(data, toDirectory: inDirectory)
     }
     
-    func writeData(data : NSData) -> String {
-        let path = self.uniquePath()
-        data.writeToFile(path, atomically: true)
-        return path
+    func writeDataWithLength(length : Int) -> NSURL {
+        return writeDataWithLength(length, inDirectory: directoryURL)
     }
-    
-    func uniquePath() -> String {
-        let path = self.directoryPath.stringByAppendingPathComponent("\(dataIndex)")
+
+    // MARK: OLD
+
+    func uniquePathOld(inDirectory directory: String) -> String {
+        let path = directory.stringByAppendingPathComponent("\(dataIndex)")
         dataIndex++
         return path
     }
     
+    func uniquePathOld() -> String {
+        let path = self.directoryPathOld.stringByAppendingPathComponent("\(dataIndex)")
+        dataIndex++
+        return path
+    }
+    
+    func writeDataOld(data : NSData, toDirectory directory: String) -> String {
+        let path = uniquePathOld(inDirectory: directory)
+        data.writeToFile(path, atomically: true)
+        return path
+    }
+
+    func writeDataOld(data : NSData) -> String {
+        return writeDataOld(data, toDirectory: directoryPathOld)
+    }
+
+    func writeDataWithLengthOld(length : Int, inDirectory : String) -> String {
+        let data = NSData.dataWithLength(length)
+        return writeDataOld(data, toDirectory: inDirectory)
+    }
+
+    func writeDataWithLengthOld(length : Int) -> String {
+        let data = NSData.dataWithLength(length)
+        return writeDataOld(data)
+    }
+
 }

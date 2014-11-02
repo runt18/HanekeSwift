@@ -160,7 +160,7 @@ public class DiskCache {
         let path = self.pathForKey(key)
         var error: NSError?
         if let data = getData() {
-            let fileManager = NSFileManager.defaultManager()
+            let fileManager = NSFileManager()
             let previousAttributes : NSDictionary? = fileManager.attributesOfItemAtPath(path, error: nil)
             let success = data.writeToFile(path, options: NSDataWritingOptions.AtomicWrite, error:&error)
             if (!success) {

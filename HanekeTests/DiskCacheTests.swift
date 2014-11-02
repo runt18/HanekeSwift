@@ -9,24 +9,17 @@
 import UIKit
 import XCTest
 
-class DiskCacheTests: XCTestCase {
+class DiskCacheTests: DiskTestCase {
 
     var sut : DiskCache!
     
-    lazy var diskCachePath : String = {
-        let diskCachePath =  DiskCache.basePath().stringByAppendingPathComponent(self.name)
-        NSFileManager.defaultManager().createDirectoryAtPath(diskCachePath, withIntermediateDirectories: true, attributes: nil, error: nil)
-        return diskCachePath
-    }()
-    
     override func setUp() {
         super.setUp()
-        sut = DiskCache(path:diskCachePath)
+        sut = DiskCache(path: directoryPathOld)
     }
     
     override func tearDown() {
         sut.removeAllData()
-        NSFileManager.defaultManager().removeItemAtPath(diskCachePath, error: nil)
         super.tearDown()
     }
     
@@ -37,17 +30,18 @@ class DiskCacheTests: XCTestCase {
     }
     
     func testInit() {
-        let sut = DiskCache(path:diskCachePath)
+        let path = directoryPathOld
+        let sut = DiskCache(path: path)
         
-        XCTAssertEqual(sut.path, diskCachePath)
+        XCTAssertEqual(sut.path, path)
         XCTAssertEqual(Int(sut.size), 0)
     }
     
     func testInitWithOneFile() {
         let name = self.name
-        let path = diskCachePath
+        let path = directoryPathOld
         let expectedSize = 8
-        self.writeDataWithLength(expectedSize, directory: path)
+        writeDataWithLengthOld(expectedSize, inDirectory: path)
         
         let sut = DiskCache(path: path)
         
@@ -58,10 +52,10 @@ class DiskCacheTests: XCTestCase {
     
     func testInitWithTwoFiles() {
         let name = self.name
-        let directory = diskCachePath
+        let directory = directoryPathOld
         let lengths = [4, 7]
-        self.writeDataWithLength(lengths[0], directory: directory)
-        self.writeDataWithLength(lengths[1], directory: directory)
+        writeDataWithLengthOld(lengths[0], inDirectory: directory)
+        writeDataWithLengthOld(lengths[1], inDirectory: directory)
         
         let sut = DiskCache(path: directory)
         
@@ -72,8 +66,8 @@ class DiskCacheTests: XCTestCase {
     
     func testInitCapacityZeroOneExistingFile() {
         let name = self.name
-        let directory = diskCachePath
-        let path = self.writeDataWithLength(1, directory: directory)
+        let directory = directoryPathOld
+        let path = writeDataWithLengthOld(1, inDirectory: directory)
         
         let sut = DiskCache(path: directory, capacity : 0)
         
@@ -85,9 +79,9 @@ class DiskCacheTests: XCTestCase {
     
     func testInitCapacityZeroTwoExistingFiles() {
         let name = self.name
-        let directory = diskCachePath
-        let path1 = self.writeDataWithLength(1, directory: directory)
-        let path2 = self.writeDataWithLength(2, directory: directory)
+        let directory = directoryPathOld
+        let path1 = writeDataWithLengthOld(1, inDirectory: directory)
+        let path2 = writeDataWithLengthOld(2, inDirectory: directory)
         
         let sut = DiskCache(path: directory, capacity : 0)
         
@@ -100,9 +94,9 @@ class DiskCacheTests: XCTestCase {
     
     func testInitLeastRecentlyUsedExistingFileDeleted() {
         let name = self.name
-        let directory = diskCachePath
-        let path1 = self.writeDataWithLength(1, directory: directory)
-        let path2 = self.writeDataWithLength(1, directory: directory)
+        let directory = directoryPathOld
+        let path1 = writeDataWithLengthOld(1, inDirectory: directory)
+        let path2 = writeDataWithLengthOld(1, inDirectory: directory)
         NSFileManager.defaultManager().setAttributes([NSFileModificationDate : NSDate.distantPast()], ofItemAtPath: path2, error: nil)
         
         let sut = DiskCache(path: directory, capacity : 1)
@@ -219,7 +213,7 @@ class DiskCacheTests: XCTestCase {
     }
     
     func testSetDataControlCapacity() {
-        let sut = DiskCache(path: diskCachePath, capacity:0)
+        let sut = DiskCache(path: directoryPathOld, capacity:0)
         let key = self.name
         let path = sut.pathForKey(key)
         
@@ -458,18 +452,6 @@ class DiskCacheTests: XCTestCase {
         let expectedPath = sut.path.stringByAppendingPathComponent(key.MD5Filename())
         
         XCTAssertEqual(sut.pathForKey(key), expectedPath)
-    }
-    
-    // MARK: Helpers
-
-    var dataIndex = 0
-    
-    func writeDataWithLength(length : Int, directory : String) -> String {
-        let data = NSData.dataWithLength(length)
-        let path = directory.stringByAppendingPathComponent("\(dataIndex)")
-        data.writeToFile(path, atomically: true)
-        dataIndex++
-        return path
     }
 
 }

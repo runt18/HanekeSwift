@@ -24,25 +24,23 @@ public class DiskCache {
 
     public var capacity : UInt64 = 0 {
         didSet {
-            dispatch_async(self.cacheQueue, {
-                self.controlCapacity()
-            })
+            self.perform(controlCapacity)
         }
     }
 
-    public lazy var cacheQueue : dispatch_queue_t = {
+    private lazy var cacheQueue : dispatch_queue_t = {
         let queueName = Haneke.Domain + "." + self.path.lastPathComponent
-        let cacheQueue = dispatch_queue_create(queueName, nil)
+        let cacheQueue = dispatch_queue_create(queueName, dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_UTILITY, 0))
         return cacheQueue
     }()
     
     public init(path : String, capacity : UInt64 = UINT64_MAX) {
         self.path = path
         self.capacity = capacity
-        dispatch_async(self.cacheQueue, {
+        self.perform {
             self.calculateSize()
             self.controlCapacity()
-        })
+        }
     }
     
     public func setData(getData : @autoclosure () -> NSData?, key : String) {
@@ -205,4 +203,24 @@ public class DiskCache {
             Log.error("Failed to remove file", error)
         }
     }
+
+    // MARK - Block performing
+
+    public func performAndWait<T>(block: () -> T?) -> T? {
+        var ret: T?
+        dispatch_sync(cacheQueue) {
+            ret = block()
+        }
+        return ret
+    }
+
+    public func performAndWait(block: () -> ()) {
+        dispatch_sync(cacheQueue, block)
+    }
+
+    public func perform(block: () -> ()) {
+        dispatch_async(cacheQueue, block)
+    }
+
+
 }

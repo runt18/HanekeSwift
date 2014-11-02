@@ -83,7 +83,18 @@ public class Fetch<T> {
     
 }
 
-public class Wrapper<T> {
-    public let value: T
-    public init(_ value: T) { self.value = value }
+public final class Wrapper<T> {
+    public let value: T!
+
+    public init!(_ value: T!) {
+        if value != nil {
+            self.value = value
+        } else {
+            return nil
+        }
+    }
+
+    public init(_ value: T) {
+        self.value = value
+    }
 }

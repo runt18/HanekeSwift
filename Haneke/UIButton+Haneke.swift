@@ -61,15 +61,14 @@ public extension UIButton {
     // See: http://stackoverflow.com/questions/25907421/associating-swift-things-with-nsobject-instances
     var hnk_imageFetcher : Fetcher<UIImage>! {
         get {
-            let wrapper = objc_getAssociatedObject(self, &Haneke.UIKitGlobals.SetImageFetcherKey) as? ObjectWrapper
-            let fetcher = wrapper?.value as? Fetcher<UIImage>
-            return fetcher
+            if let wrapper = objc_getAssociatedObject(self, &Haneke.UIKitGlobals.SetImageFetcherKey) as? Wrapper<Fetcher<UIImage>> {
+                return wrapper.value
+            } else {
+                return nil
+            }
         }
         set (fetcher) {
-            var wrapper : ObjectWrapper?
-            if let fetcher = fetcher {
-                wrapper = ObjectWrapper(value: fetcher)
-            }
+            let wrapper = Wrapper(fetcher)
             objc_setAssociatedObject(self, &Haneke.UIKitGlobals.SetImageFetcherKey, wrapper, UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
         }
     }
@@ -171,15 +170,14 @@ public extension UIButton {
     // See: http://stackoverflow.com/questions/25907421/associating-swift-things-with-nsobject-instances
     var hnk_backgroundImageFetcher : Fetcher<UIImage>! {
         get {
-            let wrapper = objc_getAssociatedObject(self, &Haneke.UIKitGlobals.SetBackgroundImageFetcherKey) as? ObjectWrapper
-            let fetcher = wrapper?.value as? Fetcher<UIImage>
-            return fetcher
+            if let wrapper = objc_getAssociatedObject(self, &Haneke.UIKitGlobals.SetBackgroundImageFetcherKey) as? Wrapper<Fetcher<UIImage>> {
+                return wrapper.value
+            } else {
+                return nil
+            }
         }
         set (fetcher) {
-            var wrapper : ObjectWrapper?
-            if let fetcher = fetcher {
-                wrapper = ObjectWrapper(value: fetcher)
-            }
+            let wrapper = Wrapper(fetcher)
             objc_setAssociatedObject(self, &Haneke.UIKitGlobals.SetBackgroundImageFetcherKey, wrapper, UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
         }
     }

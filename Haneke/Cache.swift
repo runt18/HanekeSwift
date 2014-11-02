@@ -8,15 +8,6 @@
 
 import UIKit
 
-// Used to add T to NSCache
-final class ObjectWrapper {
-    let value: Any
-    
-    init(value: Any) {
-        self.value = value
-    }
-}
-
 extension Haneke {
     
     // It'd be better to define this in the Cache class but Swift doesn't allow to declare an enum in a generic type
@@ -68,7 +59,7 @@ public class Cache<T : DataConvertible> {
     public func set(#value : T, key: String, formatName : String = Haneke.CacheGlobals.OriginalFormatName, success succeed : ((T) -> ())? = nil) {
         if let (format, memoryCache, diskCache) = self.formats[formatName] {
             self.format(value: value, format: format) { formattedValue in
-                let wrapper = ObjectWrapper(value: formattedValue)
+                let wrapper = Wrapper(formattedValue)
                 memoryCache.setObject(wrapper, forKey: key)
                 // Value data is sent as @autoclosure to be executed in the disk cache queue.
                 diskCache.setData(self.dataFromValue(formattedValue, format: format), key: key)
@@ -82,12 +73,11 @@ public class Cache<T : DataConvertible> {
     public func fetch(#key : String, formatName : String = Haneke.CacheGlobals.OriginalFormatName, failure fail : Fetch<T>.Failer? = nil, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
         let fetch = Cache.buildFetch(failure: fail, success: succeed)
         if let (format, memoryCache, diskCache) = self.formats[formatName] {
-            if let wrapper = memoryCache.objectForKey(key) as? ObjectWrapper {
-                if let result = wrapper.value as? T {
-                    fetch.succeed(result)
-                    diskCache.updateAccessDate(dataFromValue(result, format: format), key: key)
-                    return fetch
-                }
+            if let wrapper = memoryCache.objectForKey(key) as? Wrapper<T> {
+                let result = wrapper.value
+                fetch.succeed(result)
+                diskCache.updateAccessDate(dataFromValue(result, format: format), key: key)
+                return fetch
             }
 
             self.fetchFromDiskCache(diskCache, key: key, memoryCache: memoryCache, failure: { error in
@@ -208,7 +198,7 @@ public class Cache<T : DataConvertible> {
                     let descompressedValue = self.decompressedImageIfNeeded(value)
                     dispatch_async(dispatch_get_main_queue(), {
                         succeed(descompressedValue)
-                        let wrapper = ObjectWrapper(value: descompressedValue)
+                        let wrapper = Wrapper(descompressedValue)
                         memoryCache.setObject(wrapper, forKey: key)
                     })
                 }

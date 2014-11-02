@@ -102,10 +102,9 @@ class NetworkFetcherTests: XCTestCase {
         })
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.fetch(failure: {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcherGlobals.ErrorCode.InvalidData.rawValue)
-            XCTAssertNotNil($0!.localizedDescription)
+        sut.fetch(failure: { error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidData)
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }) { _ in
             XCTFail("expected failure")
@@ -124,10 +123,9 @@ class NetworkFetcherTests: XCTestCase {
         })
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.fetch(failure: {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcherGlobals.ErrorCode.MissingData.rawValue)
-            XCTAssertNotNil($0!.localizedDescription)
+        sut.fetch(failure: { error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.MissingData)
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }) { _ in
             XCTFail("expected failure")
@@ -175,10 +173,9 @@ class NetworkFetcherTests: XCTestCase {
         })
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.fetch(failure: {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode.rawValue)
-            XCTAssertNotNil($0!.localizedDescription)
+        sut.fetch(failure: { error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }) { _ in
             XCTFail("expected failure")

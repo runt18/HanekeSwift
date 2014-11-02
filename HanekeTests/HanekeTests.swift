@@ -10,13 +10,20 @@ import XCTest
 
 class HanekeTests: XCTestCase {
 
+    enum TestError: Int, ErrorRepresentable {
+        case Test = 200
+
+        static var domain: String {
+            return Haneke.Domain + ".tests"
+        }
+    }
+
     func testErrorWithCode() {
-        let code = 200
+        let code = TestError.Test
         let description = self.name
-        let error = Haneke.errorWithCode(code, description:description)
+        let error = errorWithCode(code, description: description)
         
-        XCTAssertEqual(error.domain, Haneke.Domain)
-        XCTAssertEqual(error.code, code)
+        XCTAssertTrue(error == code)
         XCTAssertEqual(error.localizedDescription, description)
     }
     

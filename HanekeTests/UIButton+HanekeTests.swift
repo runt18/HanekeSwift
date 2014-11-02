@@ -188,8 +188,8 @@ class UIButton_HanekeTests: DiskTestCase {
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.hnk_setImageFromURL(URL, failure:{error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
+        sut.hnk_setImageFromURL(URL, failure: { error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
             expectation.fulfill()
         })
         
@@ -461,8 +461,8 @@ class UIButton_HanekeTests: DiskTestCase {
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.hnk_setBackgroundImageFromURL(URL, failure:{error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
+        sut.hnk_setBackgroundImageFromURL(URL, failure: { error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
             expectation.fulfill()
         })
         

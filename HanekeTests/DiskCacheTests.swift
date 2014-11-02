@@ -262,7 +262,7 @@ class DiskCacheTests: XCTestCase {
         let expectation = self.expectationWithDescription(self.name)
         
         sut.fetchData(key, failure : { error in
-            XCTAssertEqual(error!.code, NSFileReadNoSuchFileError)
+            XCTAssertTrue(error == (NSCocoaErrorDomain, NSFileReadNoSuchFileError))
             expectation.fulfill()
         }) { data in
             XCTFail("Expected failure")

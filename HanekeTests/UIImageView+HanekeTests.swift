@@ -9,6 +9,14 @@
 import UIKit
 import XCTest
 
+enum ImageViewTestError: Int, ErrorRepresentable {
+    case Test = 0
+
+    static var domain: String {
+        return Haneke.Domain + ".imageView"
+    }
+}
+
 class UIImageView_HanekeTests: DiskTestCase {
 
     var sut : UIImageView!
@@ -296,7 +304,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let expectation = self.expectationWithDescription(self.name)
         
         sut.hnk_setImageFromFetcher(fetcher, failure: {error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
+            XCTAssertTrue(error == ImageViewTestError.Test)
             expectation.fulfill()
         })
         
@@ -478,8 +486,8 @@ class UIImageView_HanekeTests: DiskTestCase {
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.hnk_setImageFromURL(URL, failure:{error in
-            XCTAssertEqual(error!.domain, Haneke.Domain)
+        sut.hnk_setImageFromURL(URL, failure: {error in
+            XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
             expectation.fulfill()
         })
         
@@ -556,7 +564,7 @@ class MockFetcher<T : DataConvertible> : Fetcher<T> {
     }
     
     override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T.Result) -> ()) {
-        let error = Haneke.errorWithCode(0, description: "test")
+        let error = errorWithCode(ImageViewTestError.Test, description: "test")
         fail(error)
     }
     

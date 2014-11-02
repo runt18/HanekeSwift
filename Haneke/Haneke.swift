@@ -7,15 +7,36 @@
 //
 
 import UIKit
+import Swift
+
+protocol ErrorRepresentable: RawRepresentable {
+    class var domain: String { get }
+}
+
+func errorWithCode<T: ErrorRepresentable where T.RawValue == Int>(code: T, description : String? = nil) -> NSError {
+    var userInfo = [NSObject: AnyObject]()
+    if let description = description {
+        userInfo[NSLocalizedDescriptionKey] = description
+    }
+    return NSError(domain: code.dynamicType.domain, code: code.rawValue, userInfo: userInfo)
+}
+
+func ==(lhs: NSError?, rhs: (domain: String, code: Int)) -> Bool {
+    if let error = lhs {
+        if error.domain != rhs.domain { return false }
+        if error.code != rhs.code { return false }
+        return true
+    }
+    return false
+}
+
+func ==<T: ErrorRepresentable where T.RawValue == Int>(lhs: NSError?, rhs: T) -> Bool {
+    return lhs == (rhs.dynamicType.domain, rhs.rawValue)
+}
 
 public struct Haneke {
     
-    public static let Domain = "io.haneke"
- 
-    public static func errorWithCode(code : Int, description : String) -> NSError {
-        let userInfo = [NSLocalizedDescriptionKey: description]
-        return NSError(domain: Haneke.Domain, code: code, userInfo: userInfo)
-    }
+    internal static let Domain = "io.haneke"
     
     public static var sharedImageCache : Cache<UIImage> {
         struct Static {

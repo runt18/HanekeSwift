@@ -68,10 +68,9 @@ class DiskFetcherTests: DiskTestCase {
         
         let expectation = self.expectationWithDescription(self.name)
         
-        sut.fetch(failure: {
-            XCTAssertEqual($0!.domain, Haneke.Domain)
-            XCTAssertEqual($0!.code, Haneke.DiskFetcherGlobals.ErrorCode.InvalidData.rawValue)
-            XCTAssertNotNil($0!.localizedDescription)
+        sut.fetch(failure: { error in
+            XCTAssertTrue(error == Haneke.DiskFetcherGlobals.ErrorCode.InvalidData)
+            XCTAssertNotNil(error?.localizedDescription)
             expectation.fulfill()
         }) { _ in
             XCTFail("Expected to fail")

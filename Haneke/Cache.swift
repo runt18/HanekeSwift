@@ -9,7 +9,7 @@
 import UIKit
 
 // Used to add T to NSCache
-class ObjectWrapper : NSObject {
+final class ObjectWrapper {
     let value: Any
     
     init(value: Any) {
@@ -24,9 +24,13 @@ extension Haneke {
         
         public static let OriginalFormatName = "original"
 
-        public enum ErrorCode : Int {
+        public enum ErrorCode: Int, ErrorRepresentable {
             case ObjectNotFound = -100
             case FormatNotFound = -101
+
+            static var domain: String {
+                return Haneke.Domain
+            }
         }
         
     }
@@ -95,7 +99,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
         } else {
             let localizedFormat = NSLocalizedString("Format %@ not found", comment: "Error description")
             let description = String(format:localizedFormat, formatName)
-            let error = Haneke.errorWithCode(Haneke.CacheGlobals.ErrorCode.FormatNotFound.rawValue, description: description)
+            let error = errorWithCode(Haneke.CacheGlobals.ErrorCode.FormatNotFound, description: description)
             fetch.fail(error)
         }
         return fetch
@@ -191,7 +195,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
                 if (error?.code == NSFileReadNoSuchFileError) {
                     let localizedFormat = NSLocalizedString("Object not found for key %@", comment: "Error description")
                     let description = String(format:localizedFormat, key)
-                    let error = Haneke.errorWithCode(Haneke.CacheGlobals.ErrorCode.ObjectNotFound.rawValue, description: description)
+                    let error = errorWithCode(Haneke.CacheGlobals.ErrorCode.ObjectNotFound, description: description)
                     block(error)
                 } else {
                     block(error)

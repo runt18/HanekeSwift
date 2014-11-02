@@ -8,93 +8,43 @@
 
 import UIKit
 
-// See: http://stackoverflow.com/questions/25922152/not-identical-to-self
 public protocol DataConvertible {
-    typealias Result
-    
-    class func convertFromData(data:NSData) -> Result?
+    init?(data: NSData)
+    var dataValue: NSData! { get }
 }
 
-public protocol DataRepresentable {
+extension UIImage: DataConvertible {
     
-    func asData() -> NSData!
-}
-
-extension UIImage : DataConvertible, DataRepresentable {
-    
-    public typealias Result = UIImage
-    
-    public class func convertFromData(data:NSData) -> Result? {
-        let image = UIImage(data: data)
-        return image
-    }
-    
-    public func asData() -> NSData! {
+    public var dataValue: NSData! {
         return self.hnk_data()
     }
     
 }
 
-extension String : DataConvertible, DataRepresentable {
+extension String : DataConvertible {
     
-    public typealias Result = String
-    
-    public static func convertFromData(data:NSData) -> Result? {
-        var string = NSString(data: data, encoding: NSUTF8StringEncoding)
-        return string
+    public init?(data: NSData) {
+        let buf = UnsafeBufferPointer(start: UnsafePointer<Byte>(data.bytes), count: data.length)
+        self.init(bytes: buf, encoding: NSUTF8StringEncoding)
     }
     
-    public func asData() -> NSData! {
+    public var dataValue: NSData! {
         return self.dataUsingEncoding(NSUTF8StringEncoding)
     }
     
 }
 
-extension NSData : DataConvertible, DataRepresentable {
+extension NSData: DataConvertible {
     
-    public typealias Result = NSData
-    
-    public class func convertFromData(data:NSData) -> Result? {
-        return data
-    }
-    
-    public func asData() -> NSData! {
+    public var dataValue: NSData! {
         return self
     }
     
 }
 
-public enum JSON : DataConvertible, DataRepresentable {
-    public typealias Result = JSON
-    
+public enum JSON {
     case Dictionary([String:AnyObject])
     case Array([AnyObject])
-    
-    public static func convertFromData(data:NSData) -> Result? {
-        var error : NSError?
-        if let object : AnyObject = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.allZeros, error: &error) {
-            switch (object) {
-            case let dictionary as [String:AnyObject]:
-                return JSON.Dictionary(dictionary)
-            case let array as [AnyObject]:
-                return JSON.Array(array)
-            default:
-                return nil
-            }
-        } else {
-            Log.error("Invalid JSON data", error)
-            return nil
-        }
-    }
-    
-    public func asData() -> NSData! {
-        switch (self) {
-        case .Dictionary(let dictionary):
-            return NSJSONSerialization.dataWithJSONObject(dictionary, options: NSJSONWritingOptions.allZeros, error: nil)
-        case .Array(let array):
-            return NSJSONSerialization.dataWithJSONObject(array, options: NSJSONWritingOptions.allZeros, error: nil)
-        }
-    }
     
     public var array : [AnyObject]! {
         switch (self) {
@@ -114,4 +64,34 @@ public enum JSON : DataConvertible, DataRepresentable {
         }
     }
     
+}
+
+extension JSON: DataConvertible {
+
+    public init?(data: NSData) {
+        var error: NSError?
+        let object: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error)
+
+        switch (object) {
+        case let dictionary as [String: AnyObject]:
+            self = .Dictionary(dictionary)
+        case let array as [AnyObject]:
+            self = .Array(array)
+        default:
+            if let error = error {
+                println("Invalid JSON data with error \(error.localizedDescription)")
+            }
+            return nil
+        }
+    }
+
+    public var dataValue: NSData! {
+        switch (self) {
+        case .Dictionary(let dictionary):
+            return NSJSONSerialization.dataWithJSONObject(dictionary, options: nil, error: nil)
+        case .Array(let array):
+            return NSJSONSerialization.dataWithJSONObject(array, options: nil, error: nil)
+        }
+    }
+
 }

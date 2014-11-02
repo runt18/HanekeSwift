@@ -38,7 +38,7 @@ public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
     
     // MARK: Fetcher
     
-    public override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T.Result) -> ()) {
+    public override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
         self.cancelled = false
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { [weak self] in
             if let strongSelf = self {
@@ -53,7 +53,7 @@ public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
     
     // MARK: Private
     
-    private func privateFetch(failure fail : ((NSError?) -> ()), success succeed : (T.Result) -> ()) {
+    private func privateFetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
         if self.cancelled {
             return
         }
@@ -71,25 +71,20 @@ public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
             return
         }
         
-        let value : T.Result? = T.convertFromData(data!)
-        
-        if value == nil {
+        if let value = T(data: data!) {
+            dispatch_async(dispatch_get_main_queue()) {
+                if self.cancelled {
+                    return
+                }
+                succeed(value)
+            }
+        } else {
             let localizedFormat = NSLocalizedString("Failed to convert value from data at path %@", comment: "Error description")
             let description = String(format:localizedFormat, self.path)
             let error = errorWithCode(Haneke.DiskFetcherGlobals.ErrorCode.InvalidData, description: description)
             dispatch_async(dispatch_get_main_queue()) {
                 fail(error)
             }
-            return
         }
-        
-        dispatch_async(dispatch_get_main_queue(), {
-            if self.cancelled {
-                return
-            }
-            succeed(value!)
-        })
-        
-        
     }
 }

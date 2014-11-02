@@ -37,7 +37,7 @@ extension Haneke {
     
 }
 
-public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentable> {
+public class Cache<T : DataConvertible> {
     
     let name : String
     
@@ -186,7 +186,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
         if let data = format.convertToData?(value) {
             return data
         }
-        return value.asData()
+        return value.dataValue
     }
     
     private func fetchFromDiskCache(diskCache : DiskCache, key : String, memoryCache : NSCache, failure fail : ((NSError?) -> ())?, success succeed : (T) -> ()) {
@@ -203,7 +203,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
             }
         }) { data in
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-                var value = T.convertFromData(data)
+                var value = T(data: data)
                 if let value = value {
                     let descompressedValue = self.decompressedImageIfNeeded(value)
                     dispatch_async(dispatch_get_main_queue(), {
@@ -268,7 +268,7 @@ public class Cache<T : DataConvertible where T.Result == T, T : DataRepresentabl
     // MARK: Convenience fetch
     // Ideally we would put each of these in the respective fetcher file as a Cache extension. Unfortunately, this fails to link when using the framework in a project as of Xcode 6.1.
     
-    public func fetch(#key : String, value getValue : @autoclosure () -> T.Result, formatName : String = Haneke.CacheGlobals.OriginalFormatName, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
+    public func fetch(#key : String, value getValue : @autoclosure () -> T, formatName : String = Haneke.CacheGlobals.OriginalFormatName, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
         let fetcher = SimpleFetcher<T>(key: key, value: getValue)
         return self.fetch(fetcher: fetcher, formatName: formatName, success: succeed)
     }

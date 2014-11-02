@@ -24,7 +24,7 @@ func example2() {
 /// Set and fetch data from the shared data cache
 func example3() {
     let cache = Haneke.sharedDataCache
-    let data = "SGVscCEgSSdtIHRyYXBwZWQgaW4gYSBCYXNlNjQgc3RyaW5nIQ==".asData()
+    let data = "SGVscCEgSSdtIHRyYXBwZWQgaW4gYSBCYXNlNjQgc3RyaW5nIQ==".dataValue
     
     cache.set(value: data, key: "secret")
     

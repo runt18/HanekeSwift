@@ -563,7 +563,7 @@ class MockFetcher<T : DataConvertible> : Fetcher<T> {
         super.init(key: key)
     }
     
-    override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T.Result) -> ()) {
+    override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
         let error = errorWithCode(ImageViewTestError.Test, description: "test")
         fail(error)
     }

@@ -11,20 +11,20 @@ import XCTest
 
 class ImageDataTests: XCTestCase {
 
-    func testConvertFromData() {
+    func testInitWithData() {
         let image = UIImage.imageGradientFromColor()
         let data = image.hnk_data()
 
-        let result = UIImage.convertFromData(data)
+        let result = UIImage(data: data)
 
         XCTAssertTrue(image.isEqualPixelByPixel(image))
     }
     
-    func testAsData() {
+    func testDataValue() {
         let image = UIImage.imageGradientFromColor()
         let data = image.hnk_data()
         
-        let result = image.asData()
+        let result = image.dataValue
         
         XCTAssertEqual(result, data)
     }
@@ -33,40 +33,40 @@ class ImageDataTests: XCTestCase {
 
 class StringDataTests: XCTestCase {
     
-    func testConvertFromData() {
+    func testInitWithData() {
         let string = self.name
         let data = string.dataUsingEncoding(NSUTF8StringEncoding)!
         
-        let result = String.convertFromData(data)
+        let result = String(data: data)
         
         XCTAssertEqual(result!, string)
     }
     
-    func testAsData() {
+    func testDataValue() {
         let string = self.name
-        let data = string.dataUsingEncoding(NSUTF8StringEncoding)!
+        let data = string.dataUsingEncoding(NSUTF8StringEncoding)
         
-        let result = string.asData()
+        let result = string.dataValue
         
-        XCTAssertEqual(result, data)
+        XCTAssertEqual(result, data!)
     }
     
 }
 
 class DataDataTests: XCTestCase {
     
-    func testConvertFromData() {
+    func testInitWithData() {
         let data = NSData.dataWithLength(32)
         
-        let result = NSData.convertFromData(data)
+        let result = NSData(data: data)
         
-        XCTAssertEqual(result!, data)
+        XCTAssertEqual(result, data)
     }
     
-    func testAsData() {
+    func testDataValue() {
         let data = NSData.dataWithLength(32)
         
-        let result = data.asData()
+        let result = data.dataValue
         
         XCTAssertEqual(result, data)
     }
@@ -75,11 +75,11 @@ class DataDataTests: XCTestCase {
 
 class JSONDataTests: XCTestCase {
     
-    func testConvertFromData_WithArrayData() {
+    func testInitWithData_WithArrayData() {
         let json = [self.name]
         let data = NSJSONSerialization.dataWithJSONObject(json, options: NSJSONWritingOptions.allZeros, error: nil)!
         
-        let result = JSON.convertFromData(data)!
+        let result = JSON(data: data)!
         
         switch result {
         case .Dictionary(_):
@@ -90,11 +90,11 @@ class JSONDataTests: XCTestCase {
         }
     }
     
-    func testConvertFromData_WithDictionaryData() {
+    func testInitWithData_WithDictionaryData() {
         let json = ["test": self.name]
         let data = NSJSONSerialization.dataWithJSONObject(json, options: NSJSONWritingOptions.allZeros, error: nil)!
         
-        let result = JSON.convertFromData(data)!
+        let result = JSON(data: data)!
         
         switch result {
         case .Dictionary(let object):
@@ -104,10 +104,10 @@ class JSONDataTests: XCTestCase {
         }
     }
     
-    func testConvertFromData_WithInvalidData() {
+    func testInitWithData_WithInvalidData() {
         let data = NSData.dataWithLength(100)
 
-        let result = JSON.convertFromData(data)
+        let result = JSON(data: data)
         
         XCTAssertTrue(result == nil)
     }
@@ -116,7 +116,7 @@ class JSONDataTests: XCTestCase {
         let object = [self.name]
         let json = JSON.Array(object)
         
-        let result = json.asData()
+        let result = json.dataValue
         
         let data = NSJSONSerialization.dataWithJSONObject(object, options: NSJSONWritingOptions.allZeros, error: nil)!
         XCTAssertEqual(result, data)
@@ -126,7 +126,7 @@ class JSONDataTests: XCTestCase {
         let object = ["test": self.name]
         let json = JSON.Dictionary(object)
         
-        let result = json.asData()
+        let result = json.dataValue
         
         let data = NSJSONSerialization.dataWithJSONObject(object, options: NSJSONWritingOptions.allZeros, error: nil)!
         XCTAssertEqual(result, data)
@@ -138,7 +138,7 @@ class JSONDataTests: XCTestCase {
         
         // TODO: Swift doesn't support XCAssertThrows yet.
         // See: http://stackoverflow.com/questions/25529625/testing-assertion-in-swift
-        // XCAssertThrows(json.asData())
+        // XCAssertThrows(json.dataValue)
     }
     
     func testArray_Array() {

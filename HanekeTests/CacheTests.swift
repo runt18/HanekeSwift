@@ -579,13 +579,13 @@ class FailFetcher<T : DataConvertible> : Fetcher<T> {
         super.init(key: key)
     }
     
-    override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T.Result) -> ()) {
+    override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
         fail(error)
     }
     
 }
 
-class CacheMock<T : DataConvertible where T.Result == T, T : DataRepresentable> : Cache<T> {
+class CacheMock<T : DataConvertible> : Cache<T> {
     
     var expectation : XCTestExpectation?
     

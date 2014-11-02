@@ -11,14 +11,14 @@ import XCTest
 class String_HanekeTests: XCTestCase {
 
     func testEscapedFilename() {
-        XCTAssertEqual("".escapedFilename(), "")
-        XCTAssertEqual(":".escapedFilename(), "%3A")
-        XCTAssertEqual("/".escapedFilename(), "%2F")
-        XCTAssertEqual(" ".escapedFilename(), " ")
-        XCTAssertEqual("\\".escapedFilename(), "\\")
-        XCTAssertEqual("test".escapedFilename(), "test")
-        XCTAssertEqual("http://haneke.io".escapedFilename(), "http%3A%2F%2Fhaneke.io")
-        XCTAssertEqual("/path/to/file".escapedFilename(), "%2Fpath%2Fto%2Ffile")
+        XCTAssertEqual("".hnk_escapedFilename, "")
+        XCTAssertEqual(":".hnk_escapedFilename, "%3A")
+        XCTAssertEqual("/".hnk_escapedFilename, "%2F")
+        XCTAssertEqual(" ".hnk_escapedFilename, " ")
+        XCTAssertEqual("\\".hnk_escapedFilename, "\\")
+        XCTAssertEqual("test".hnk_escapedFilename, "test")
+        XCTAssertEqual("http://haneke.io".hnk_escapedFilename, "http%3A%2F%2Fhaneke.io")
+        XCTAssertEqual("/path/to/file".hnk_escapedFilename, "%2Fpath%2Fto%2Ffile")
     }
     
     func testMD5String() {

@@ -449,14 +449,14 @@ class DiskCacheTests: XCTestCase {
     
     func testPathForKey_WithShortKey() {
         let key = "test"
-        let expectedPath = sut.path.stringByAppendingPathComponent(key.escapedFilename())
+        let expectedPath = sut.path.stringByAppendingPathComponent(key.hnk_escapedFilename)
 
         XCTAssertEqual(sut.pathForKey(key), expectedPath)
     }
     
     func testPathForKey_WithShortKeyWithSpecialCharacters() {
         let key = "http://haneke.io"
-        let expectedPath = sut.path.stringByAppendingPathComponent(key.escapedFilename())
+        let expectedPath = sut.path.stringByAppendingPathComponent(key.hnk_escapedFilename)
         
         XCTAssertEqual(sut.pathForKey(key), expectedPath)
     }

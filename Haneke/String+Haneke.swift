@@ -10,13 +10,16 @@ import Foundation
 
 extension String {
 
-    func escapedFilename() -> String {
-        let originalString = self as NSString as CFString
-        let charactersToLeaveUnescaped = " \\" as NSString as CFString // TODO: Add more characters that are valid in paths but not in URLs
-        let legalURLCharactersToBeEscaped = "/:" as NSString as CFString
-        let encoding = CFStringBuiltInEncodings.UTF8.rawValue
-        let escapedPath = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, originalString, charactersToLeaveUnescaped, legalURLCharactersToBeEscaped, encoding)
-        return escapedPath as NSString as String
+    private struct Filename {
+        static let allowedCharacters: NSCharacterSet = {
+            let charSet = NSMutableCharacterSet()
+            charSet.addCharactersInString("/:")
+            return charSet.invertedSet
+        }()
+    }
+
+    var hnk_escapedFilename: String {
+        return stringByAddingPercentEncodingWithAllowedCharacters(Filename.allowedCharacters) ?? self
     }
     
     func MD5String() -> String {

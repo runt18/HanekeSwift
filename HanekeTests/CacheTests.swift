@@ -35,33 +35,6 @@ class CacheTests: XCTestCase {
     func testDeinit() {
         weak var sut = Cache<UIImage>(name: self.name)
     }
-    
-    // MARK: cachePath
-    
-    func testCachePath() {
-        let expectedCachePath = DiskCache.basePath().stringByAppendingPathComponent(sut.name)
-        XCTAssertEqual(sut.cachePath, expectedCachePath)
-    }
-    
-    // MARK: formatPath
-    
-    func testFormatPath() {
-        let formatName = self.name
-        let expectedFormatPath = sut.cachePath.stringByAppendingPathComponent(formatName)
-        
-        let formatPath = sut.formatPath(formatName: formatName)
-        
-        XCTAssertEqual(formatPath, expectedFormatPath)
-    }
-    
-    func testFormatPath_WithEmptyName() {
-        let formatName = ""
-        let expectedFormatPath = sut.cachePath.stringByAppendingPathComponent(formatName)
-        
-        let formatPath = sut.formatPath(formatName: formatName)
-        
-        XCTAssertEqual(formatPath, expectedFormatPath)
-    }
 
     // MARK: addFormat
     
@@ -167,7 +140,7 @@ class CacheTests: XCTestCase {
         
         XCTAssertFalse(fetch.hasSucceeded)
         XCTAssertFalse(fetch.hasFailed)
-        self.waitForExpectationsWithTimeout(1, nil)
+        self.waitForExpectationsWithTimeout(2, nil)
         XCTAssertTrue(fetch.hasSucceeded)
         XCTAssertFalse(fetch.hasFailed)
     }

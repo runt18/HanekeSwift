@@ -90,14 +90,4 @@ class DiskTestCase : XCTestCase {
         return writeDataOld(data, toDirectory: directoryPathOld)
     }
 
-    func writeDataWithLengthOld(length : Int, inDirectory : String) -> String {
-        let data = NSData.dataWithLength(length)
-        return writeDataOld(data, toDirectory: inDirectory)
-    }
-
-    func writeDataWithLengthOld(length : Int) -> String {
-        let data = NSData.dataWithLength(length)
-        return writeDataOld(data)
-    }
-
 }

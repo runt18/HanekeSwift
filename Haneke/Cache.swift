@@ -146,28 +146,9 @@ public class Cache<T : DataConvertible> {
     
     public func addFormat(format : Format<T>) {
         let name = format.name
-        let formatPath = self.formatPath(formatName: name)
         let memoryCache = NSCache()
-        let diskCache = DiskCache(path: formatPath, capacity : format.diskCapacity)
+        let diskCache = DiskCache(name: "\(self.name)/\(name)", capacity: format.diskCapacity)
         self.formats[name] = (format, memoryCache, diskCache)
-    }
-    
-    // MARK: Internal
-    
-    lazy var cachePath : String = {
-        let basePath = DiskCache.basePath()
-        let cachePath = basePath.stringByAppendingPathComponent(self.name)
-        return cachePath
-    }()
-    
-    func formatPath(#formatName : String) -> String {
-        let formatPath = self.cachePath.stringByAppendingPathComponent(formatName)
-        var error : NSError? = nil
-        let success = NSFileManager.defaultManager().createDirectoryAtPath(formatPath, withIntermediateDirectories: true, attributes: nil, error: &error)
-        if (!success) {
-            Log.error("Failed to create directory \(formatPath)", error)
-        }
-        return formatPath
     }
     
     // MARK: Private

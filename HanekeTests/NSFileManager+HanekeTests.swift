@@ -10,121 +10,57 @@ import XCTest
 
 class NSFileManager_HanekeTests: DiskTestCase {
     
-    func testEnumerateContentsOfDirectoryAtPathEmpty() {
-        let sut = NSFileManager.defaultManager()
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLNameKey, ascending: true) { (URL : NSURL, index : Int, _) -> Void in
+    func testEnumerateDirectoryEmpty() {
+        for URL in fileManager.contents(directoryAtURL: directoryURL, includingProperties: nil) {
             XCTFail()
         }
     }
     
-    func testEnumerateContentsOfDirectoryAtPathStop() {
-        let sut = NSFileManager.defaultManager()
-        
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ]
+    func testEnumerateDirectoryStop() {
+        let URLs = [ writeDataWithLength(1), writeDataWithLength(2) ]
         var count = 0
         
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLNameKey, ascending: true) { (_ : NSURL, index : Int, inout stop : Bool) -> Void in
+        for itemURL in fileManager.contents(directoryAtURL: directoryURL, includingProperties: nil) {
             count++
-            stop = true
+            break
         }
         
         XCTAssertEqual(count, 1)
     }
     
-    func testEnumerateContentsOfDirectoryAtPathNameAscending() {
-        let sut = NSFileManager.defaultManager()
-    
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ].sorted(<)
-        var resultPaths : Array<String> = []
-        var indexes : Array<Int> = []
+    func testEnumerateDirectoryNameAscending() {
+        let URLs = [ writeDataWithLength(1), writeDataWithLength(2) ].sorted { lhs, rhs in
+            return lhs.lastPathComponent < rhs.lastPathComponent
+        }
         
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLNameKey, ascending: true) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
+        var results = [NSURL]()
+        var indexes = [Int]()
+        
+        for (index, URL) in enumerate(fileManager.contents(directoryAtURL: directoryURL, includingProperties: nil)) {
+            results.append(URL)
             indexes.append(index)
         }
         
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
+        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results, URLs)
         XCTAssertEqual(indexes[0], 0)
         XCTAssertEqual(indexes[1], 1)
     }
     
-    func testEnumerateContentsOfDirectoryAtPathNameDescending() {
-        let sut = NSFileManager.defaultManager()
+    func testEnumerateDirectoryFileSizeAscending() {
+        let URLs = [ writeDataWithLength(1), writeDataWithLength(2) ]
+        let results = [NSURL](fileManager.contents(directoryAtURL: directoryURL, sortedByResourceValue: NSURLFileSizeKey, isOrderedBefore: NSFileManager.Utilities.NumbersOrderedBefore))
         
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ].sorted(>)
-        var resultPaths : Array<String> = []
-        var indexes : Array<Int> = []
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLNameKey, ascending: false) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
-            indexes.append(index)
-        }
-        
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
-        XCTAssertEqual(indexes[0], 0)
-        XCTAssertEqual(indexes[1], 1)
+        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results, URLs)
     }
     
-    func testEnumerateContentsOfDirectoryAtPathFileSizeAscending() {
-        let sut = NSFileManager.defaultManager()
-        
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ]
-        var resultPaths : Array<String> = []
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLFileSizeKey, ascending: true) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
-        }
-        
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
-    }
-    
-    func testEnumerateContentsOfDirectoryAtPathFileSizeDescending() {
-        let sut = NSFileManager.defaultManager()
-        
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ].reverse()
-        var resultPaths : Array<String> = []
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLFileSizeKey, ascending: false) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
-        }
-        
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
-    }
-    
-    func testEnumerateContentsOfDirectoryAtPathModificationDateAscending() {
-        let sut = NSFileManager.defaultManager()
-        
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2 )]
-        sut.setAttributes([NSFileModificationDate : NSDate.distantPast()], ofItemAtPath: paths[0], error: nil)
-        
-        var resultPaths : Array<String> = []
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLContentModificationDateKey, ascending: true) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
-        }
-        
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
-    }
-    
-    func testEnumerateContentsOfDirectoryAtPathModificationDateDescending() {
-        let sut = NSFileManager.defaultManager()
-        
-        let paths = [ writeDataWithLengthOld(1), writeDataWithLengthOld(2) ]
-        sut.setAttributes([NSFileModificationDate : NSDate.distantPast()], ofItemAtPath: paths[1], error: nil)
-        var resultPaths : Array<String> = []
-        
-        sut.enumerateContentsOfDirectoryAtPath(self.directoryPathOld, orderedByProperty: NSURLContentModificationDateKey, ascending: false) { (URL : NSURL, index : Int, _) -> Void in
-            resultPaths.append(URL.path!)
-        }
-        
-        XCTAssertEqual(resultPaths.count, 2)
-        XCTAssertEqual(resultPaths, paths)
+    func testEnumerateDirectoryModificationDateAscending() {
+        let URLs = [ writeDataWithLength(1), writeDataWithLength(2) ]
+        let results = [NSURL](fileManager.contents(directoryAtURL: directoryURL, sortedByResourceValue: NSURLContentModificationDateKey, isOrderedBefore: NSFileManager.Utilities.DatesOrderedBefore))
+
+        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results, URLs)
     }
     
 }

@@ -92,7 +92,7 @@ class UIButton_HanekeTests: DiskTestCase {
         let expectedImage = UIImage.imageWithColor(UIColor.greenColor())
         let format = Format<UIImage>(name: self.name, diskCapacity: 0) { _ in return expectedImage }
         let key = self.name
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImage(image, key: key, state: .Highlighted, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))
@@ -105,37 +105,40 @@ class UIButton_HanekeTests: DiskTestCase {
     // MARK: setImageFromFile
     
     func testSetImageFromFile_MemoryMiss_UIControlStateSelected() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let URL = uniqueURL()
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         
-        sut.hnk_setImageFromFile(fetcher.key, state: .Selected)
+        sut.hnk_setImageFromURL(URL, state: .Selected)
         
         XCTAssertNil(sut.imageForState(.Selected))
         XCTAssertEqual(sut.hnk_imageFetcher.key, fetcher.key)
     }
     
     func testSetImageFromFile_MemoryHit_UIControlStateNormal() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let expectedImage = setImage(image, key: fetcher.key, format: sut.hnk_imageFormat)
         
-        sut.hnk_setImageFromFile(fetcher.key)
+        sut.hnk_setImageFromURL(URL)
         
         XCTAssertTrue(sut.imageForState(.Normal)?.isEqualPixelByPixel(image) == true)
         XCTAssertTrue(sut.hnk_imageFetcher == nil)
     }
     
     func testSetImageFromFileSuccessFailure_MemoryHit_UIControlStateSelected() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let cache = Haneke.sharedImageCache
         let format = sut.hnk_imageFormat
         cache.set(value: image, key: fetcher.key, formatName: format.name)
         
-        sut.hnk_setImageFromFile(fetcher.key, state: .Selected, failure: {error in
+        sut.hnk_setImageFromURL(URL, state: .Selected, failure: { error in
             XCTFail("")
-            }){result in
-                XCTAssertTrue(result.isEqualPixelByPixel(image))
-        }
+        }, success: { result in
+            XCTAssertTrue(result.isEqualPixelByPixel(image))
+        })
     }
     
     // MARK: setImageFromURL
@@ -186,7 +189,7 @@ class UIButton_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL, failure: { error in
             XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
@@ -210,7 +213,7 @@ class UIButton_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))
@@ -363,7 +366,7 @@ class UIButton_HanekeTests: DiskTestCase {
         let expectedImage = UIImage.imageWithColor(UIColor.greenColor())
         let format = Format<UIImage>(name: self.name, diskCapacity: 0) { _ in return expectedImage }
         let key = self.name
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setBackgroundImage(image, key: key, state: .Highlighted, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))
@@ -376,20 +379,22 @@ class UIButton_HanekeTests: DiskTestCase {
     // MARK: setBackgroundImageFromFile
     
     func testSetBackgroundImageFromFile_MemoryMiss_UIControlStateSelected() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let URL = uniqueURL()
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         
-        sut.hnk_setBackgroundImageFromFile(fetcher.key, state: .Selected)
+        sut.hnk_setBackgroundImageFromURL(URL, state: .Selected)
         
         XCTAssertNil(sut.backgroundImageForState(.Selected))
         XCTAssertEqual(sut.hnk_backgroundImageFetcher.key, fetcher.key)
     }
     
     func testSetBackgroundImageFromFile_MemoryHit_UIControlStateNormal() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let expectedImage = setImage(image, key: fetcher.key, format: sut.hnk_backgroundImageFormat)
         
-        sut.hnk_setBackgroundImageFromFile(fetcher.key)
+        sut.hnk_setBackgroundImageFromURL(URL)
         
         let result = sut.backgroundImageForState(.Normal)
         XCTAssertTrue(result?.isEqualPixelByPixel(expectedImage) == true)
@@ -397,17 +402,18 @@ class UIButton_HanekeTests: DiskTestCase {
     }
     
     func testSetBackgroundImageFromFileSuccessFailure_MemoryHit_UIControlStateSelected() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let cache = Haneke.sharedImageCache
         let format = sut.hnk_backgroundImageFormat
         cache.set(value: image, key: fetcher.key, formatName: format.name)
         
-        sut.hnk_setBackgroundImageFromFile(fetcher.key, state: .Selected, failure: {error in
+        sut.hnk_setBackgroundImageFromURL(URL, state: .Selected, failure: { error in
             XCTFail("")
-            }){result in
-                XCTAssertTrue(result.isEqualPixelByPixel(image))
-        }
+        }, { result in
+            XCTAssertTrue(result.isEqualPixelByPixel(image))
+        })
     }
     
     // MARK: setBackgroundImageFromURL
@@ -459,7 +465,7 @@ class UIButton_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setBackgroundImageFromURL(URL, failure: { error in
             XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
@@ -483,7 +489,7 @@ class UIButton_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setBackgroundImageFromURL(URL, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))

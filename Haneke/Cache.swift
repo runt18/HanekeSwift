@@ -244,14 +244,9 @@ public class Cache<T : DataConvertible> {
         return self.fetch(fetcher: fetcher, formatName: formatName, success: succeed)
     }
     
-    public func fetch(#path : String, formatName : String = Haneke.CacheGlobals.OriginalFormatName,  failure fail : Fetch<T>.Failer? = nil, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
-        let fetcher = DiskFetcher<T>(path: path)
-        return self.fetch(fetcher: fetcher, formatName: formatName, failure: fail, success: succeed)
-    }
-    
-    public func fetch(#URL : NSURL, formatName : String = Haneke.CacheGlobals.OriginalFormatName,  failure fail : Fetch<T>.Failer? = nil, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
-        let fetcher = NetworkFetcher<T>(URL: URL)
-        return self.fetch(fetcher: fetcher, formatName: formatName, failure: fail, success: succeed)
+    public func fetch(#URL : NSURL, formatName : String = Haneke.CacheGlobals.OriginalFormatName, failure fail : Fetch<T>.Failer? = nil, success succeed : Fetch<T>.Succeeder? = nil) -> Fetch<T> {
+        let fetcher = URL.fileURL ? DiskFetcher<T>(URL: URL) : NetworkFetcher<T>(URL: URL)
+        return fetch(fetcher: fetcher, formatName: formatName, failure: fail, success: succeed)
     }
     
 }

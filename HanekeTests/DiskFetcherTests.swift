@@ -12,28 +12,28 @@ import XCTest
 class DiskFetcherTests: DiskTestCase {
     
     var sut : DiskFetcher<UIImage>!
-    var path : String!
+    var URL: NSURL!
 
     override func setUp() {
         super.setUp()
-        path = self.uniquePathOld()
-        sut = DiskFetcher(path: path)
+        URL = self.uniqueURL()
+        sut = DiskFetcher(URL: URL)
     }
     
     func testInit() {
-        XCTAssertEqual(sut.path, path)
+        XCTAssertEqual(sut.URL, URL)
     }
     
     func testKey() {
-        XCTAssertEqual(sut.key, path)
+        XCTAssertEqual(sut.key, URL.absoluteString!)
     }
     
     func testFetchImage_Success() {
         let image = UIImage.imageWithColor(UIColor.greenColor(), CGSizeMake(10, 20))
         let data = UIImagePNGRepresentation(image)
-        data.writeToFile(sut.path, atomically: true)
+        data.writeToURL(sut.URL, options: .DataWritingAtomic, error: nil)
         
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.fetch(failure: { _ in
             XCTFail("Expected to succeed")
@@ -48,11 +48,10 @@ class DiskFetcherTests: DiskTestCase {
     }
     
     func testFetchImage_Failure_NSFileReadNoSuchFileError() {
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
-        sut.fetch(failure: {
-            XCTAssertEqual($0!.code, NSFileReadNoSuchFileError)
-            XCTAssertNotNil($0!.localizedDescription)
+        sut.fetch(failure: { error in
+            XCTAssertTrue(error == (NSCocoaErrorDomain, NSFileReadNoSuchFileError))
             expectation.fulfill()
         }) { _ in
             XCTFail("Expected to fail")
@@ -64,9 +63,9 @@ class DiskFetcherTests: DiskTestCase {
     
     func testFetchImage_Failure_HNKDiskEntityInvalidDataError() {
         let data = NSData()
-        data.writeToFile(sut.path, atomically: true)
+        data.writeToURL(sut.URL, options: .DataWritingAtomic, error: nil)
         
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.fetch(failure: { error in
             XCTAssertTrue(error == Haneke.DiskFetcherGlobals.ErrorCode.InvalidData)
@@ -83,7 +82,7 @@ class DiskFetcherTests: DiskTestCase {
     func testCancelFetch() {
         let image = UIImage.imageWithColor(UIColor.greenColor(), CGSizeMake(10, 20))
         let data = UIImagePNGRepresentation(image)
-        data.writeToFile(directoryPathOld, atomically: true)
+        data.writeToURL(directoryURL, options: .DataWritingAtomic, error: nil)
         sut.fetch(failure: { _ in
             XCTFail("Unexpected failure")
         }) { _ in
@@ -103,11 +102,11 @@ class DiskFetcherTests: DiskTestCase {
     
     func testCacheFetch_Success() {
         let data = NSData.dataWithLength(1)
-        let path = writeDataOld(data)
-        let expectation = self.expectationWithDescription(self.name)
-        let cache = Cache<NSData>(name: self.name)
+        let URL = writeData(data)
+        let expectation = expectationWithDescription(name)
+        let cache = Cache<NSData>(name: name)
         
-        cache.fetch(path: path, failure: {_ in
+        cache.fetch(URL: URL, failure: {_ in
             XCTFail("expected success")
             expectation.fulfill()
         }) {
@@ -121,11 +120,11 @@ class DiskFetcherTests: DiskTestCase {
     }
     
     func testCacheFetch_Failure() {
-        let path = self.directoryPathOld.stringByAppendingPathComponent(self.name)
-        let expectation = self.expectationWithDescription(self.name)
-        let cache = Cache<NSData>(name: self.name)
+        let URL = self.directoryURL.URLByAppendingPathComponent(name, isDirectory: false)
+        let expectation = expectationWithDescription(name)
+        let cache = Cache<NSData>(name: name)
         
-        cache.fetch(path: path, failure: {_ in
+        cache.fetch(URL: URL, failure: {_ in
             expectation.fulfill()
         }) { _ in
             XCTFail("expected success")
@@ -139,13 +138,13 @@ class DiskFetcherTests: DiskTestCase {
     
     func testCacheFetch_WithFormat() {
         let data = NSData.dataWithLength(1)
-        let path = writeDataOld(data)
-        let expectation = self.expectationWithDescription(self.name)
-        let cache = Cache<NSData>(name: self.name)
-        let format = Format<NSData>(name: self.name)
+        let URL = writeData(data)
+        let expectation = expectationWithDescription(name)
+        let cache = Cache<NSData>(name: name)
+        let format = Format<NSData>(name: name)
         cache.addFormat(format)
         
-        cache.fetch(path: path, formatName: format.name, failure: {_ in
+        cache.fetch(URL: URL, formatName: format.name, failure: {_ in
             XCTFail("expected success")
             expectation.fulfill()
         }) {

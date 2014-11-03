@@ -27,13 +27,12 @@ extension Haneke {
 
 public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
     
-    let path : String
+    let URL: NSURL
     var cancelled = false
     
-    public init(path : String) {
-        self.path = path
-        let key = path
-        super.init(key: key)
+    public init(URL: NSURL) {
+        self.URL = URL
+        super.init(key: URL.absoluteString!)
     }
     
     // MARK: Fetcher
@@ -54,34 +53,28 @@ public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
     // MARK: Private
     
     private func privateFetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
-        if self.cancelled {
-            return
-        }
+        if self.cancelled { return }
         
         var error: NSError?
-        let data = NSData(contentsOfFile: self.path, options: NSDataReadingOptions.allZeros, error: &error)
-        if data == nil {
-            dispatch_async(dispatch_get_main_queue()) {
-                fail(error)
-            }
-            return
-        }
-        
-        if self.cancelled {
-            return
-        }
-        
-        if let value = T(data: data!) {
-            dispatch_async(dispatch_get_main_queue()) {
-                if self.cancelled {
-                    return
+        if let data = NSData(contentsOfURL: URL, options: .DataReadingMappedIfSafe, error: &error) {
+            if self.cancelled { return }
+
+            if let value = T(data: data) {
+                dispatch_async(dispatch_get_main_queue()) {
+                    if self.cancelled {
+                        return
+                    }
+                    succeed(value)
                 }
-                succeed(value)
+            } else {
+                let localizedFormat = NSLocalizedString("Failed to convert value from data at %@", comment: "Error description")
+                let description = String(format:localizedFormat, URL)
+                let error = errorWithCode(Haneke.DiskFetcherGlobals.ErrorCode.InvalidData, description: description)
+                dispatch_async(dispatch_get_main_queue()) {
+                    fail(error)
+                }
             }
         } else {
-            let localizedFormat = NSLocalizedString("Failed to convert value from data at path %@", comment: "Error description")
-            let description = String(format:localizedFormat, self.path)
-            let error = errorWithCode(Haneke.DiskFetcherGlobals.ErrorCode.InvalidData, description: description)
             dispatch_async(dispatch_get_main_queue()) {
                 fail(error)
             }

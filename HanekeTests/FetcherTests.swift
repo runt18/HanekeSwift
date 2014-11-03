@@ -25,7 +25,7 @@ class FetcherTests: XCTestCase {
         let key = self.name
         let image = UIImage.imageWithColor(UIColor.greenColor())
         let fetcher = SimpleFetcher<UIImage>(key: key, value: image)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         fetcher.fetch(failure: { _ in
             XCTFail("expected success")
@@ -39,8 +39,8 @@ class FetcherTests: XCTestCase {
     
     func testCacheFetch() {
         let data = NSData.dataWithLength(1)
-        let expectation = self.expectationWithDescription(self.name)
-        let cache = Cache<NSData>(name: self.name)
+        let expectation = expectationWithDescription(name)
+        let cache = Cache<NSData>(name: name)
         
         cache.fetch(key: self.name, value: data) {
             XCTAssertEqual($0, data)
@@ -54,9 +54,9 @@ class FetcherTests: XCTestCase {
     
     func testCacheFetch_WithFormat() {
         let data = NSData.dataWithLength(1)
-        let expectation = self.expectationWithDescription(self.name)
-        let cache = Cache<NSData>(name: self.name)
-        let format = Format<NSData>(name: self.name)
+        let expectation = expectationWithDescription(name)
+        let cache = Cache<NSData>(name: name)
+        let format = Format<NSData>(name: name)
         cache.addFormat(format)
         
         cache.fetch(key: self.name, value: data, formatName: format.name) {

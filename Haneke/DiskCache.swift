@@ -28,14 +28,6 @@ public class DiskCache {
         return cacheURL
     }
 
-    public class func basePath() -> String {
-        let cachesPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-        let hanekePathComponent = Haneke.Domain
-        let basePath = cachesPath.stringByAppendingPathComponent(hanekePathComponent)
-        // TODO: Do not recaculate basePath value
-        return basePath
-    }
-    
     private let fileManager: NSFileManager
     public let URL: NSURL
     private(set) public var size : UInt64 = 0
@@ -43,10 +35,6 @@ public class DiskCache {
         didSet {
             self.perform(controlCapacity)
         }
-    }
-
-    public var path: String {
-        return self.URL.path!
     }
 
     private lazy var cacheQueue : dispatch_queue_t = {

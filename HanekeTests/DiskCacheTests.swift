@@ -238,7 +238,7 @@ class DiskCacheTests: DiskTestCase {
         let key = self.name
         sut.setData(data, key : key)
         
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.fetchData(key, success: {
             expectation.fulfill()
@@ -252,7 +252,7 @@ class DiskCacheTests: DiskTestCase {
     
     func testFetchData_Inexisting() {
         let key = self.name
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.fetchData(key, failure : { error in
             XCTAssertTrue(error == (NSCocoaErrorDomain, NSFileReadNoSuchFileError))

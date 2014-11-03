@@ -190,7 +190,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let image = UIImage.imageWithColor(UIColor.greenColor())
         let key = self.name
         sut.contentMode = .Center // No resizing
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImage(image, key: key, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(image))
@@ -207,7 +207,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let expectedImage = UIImage.imageWithColor(UIColor.greenColor())
         let format = Format<UIImage>(name: self.name, diskCapacity: 0) { _ in return expectedImage }
         let key = self.name
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImage(image, key: key, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))
@@ -285,7 +285,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let key = self.name
         let fetcher = SimpleFetcher<UIImage>(key: key, value: image)
         sut.contentMode = .Center // No resizing
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromFetcher(fetcher, success: { resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(image))
@@ -301,7 +301,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let image = UIImage.imageWithColor(UIColor.greenColor())
         let key = self.name
         let fetcher = MockFetcher<UIImage>(key:key)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromFetcher(fetcher, failure: {error in
             XCTAssertTrue(error == ImageViewTestError.Test)
@@ -319,7 +319,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let format = Format<UIImage>(name: self.name, diskCapacity: 0) { _ in return expectedImage }
         let key = self.name
         let fetcher = SimpleFetcher<UIImage>(key: key, value: image)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromFetcher(fetcher, format: format, success: { resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))
@@ -332,31 +332,34 @@ class UIImageView_HanekeTests: DiskTestCase {
     // MARK: setImageFromFile
     
     func testSetImageFromFile_MemoryMiss() {
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let URL = uniqueURL()
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         
-        sut.hnk_setImageFromFile(fetcher.key)
+        sut.hnk_setImageFromURL(URL)
         
         XCTAssertNil(sut.image)
         XCTAssertEqual(sut.hnk_fetcher.key, fetcher.key)
     }
     
     func testSetImageFromFile_MemoryHit() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.orangeColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let expectedImage = setImage(image, key: fetcher.key)
         
-        sut.hnk_setImageFromFile(fetcher.key)
+        sut.hnk_setImageFromURL(URL)
         
         XCTAssertTrue(sut.image?.isEqualPixelByPixel(expectedImage) == true)
         XCTAssertTrue(sut.hnk_fetcher == nil)
     }
     
     func testSetImageFromFileSuccessFailure_MemoryHit() {
+        let URL = uniqueURL()
         let image = UIImage.imageWithColor(UIColor.greenColor())
-        let fetcher = DiskFetcher<UIImage>(path: self.uniquePathOld())
+        let fetcher = DiskFetcher<UIImage>(URL: URL)
         let expectedImage = setImage(image, key: fetcher.key)
         
-        sut.hnk_setImageFromFile(fetcher.key, failure: {error in
+        sut.hnk_setImageFromURL(URL, failure: {error in
             XCTFail("")
         }) { result in
             XCTAssertTrue(result.isEqualPixelByPixel(expectedImage))
@@ -434,7 +437,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
         sut.contentMode = .Center // No resizing
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(image))
@@ -463,7 +466,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         })
         let URL2 = NSURL(string: "http://haneke.io/2.png")!
         let fetcher2 = NetworkFetcher<UIImage>(URL: URL2)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL2, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(image))
@@ -484,7 +487,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL, failure: {error in
             XCTAssertTrue(error == Haneke.NetworkFetcherGlobals.ErrorCode.InvalidStatusCode)
@@ -508,7 +511,7 @@ class UIImageView_HanekeTests: DiskTestCase {
         })
         let URL = NSURL(string: "http://haneke.io")!
         let fetcher = NetworkFetcher<UIImage>(URL: URL)
-        let expectation = self.expectationWithDescription(self.name)
+        let expectation = expectationWithDescription(name)
         
         sut.hnk_setImageFromURL(URL, format: format, success:{resultImage in
             XCTAssertTrue(resultImage.isEqualPixelByPixel(expectedImage))

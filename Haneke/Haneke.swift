@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Swift
+import MobileCoreServices
 
 protocol ErrorRepresentable: RawRepresentable {
     class var domain: String { get }
@@ -69,6 +69,10 @@ public struct Haneke {
         }
         return Static.cache
     }
+    
+    internal static let CacheItem: String! = {
+        return UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, "hnk", kUTTypeData).takeRetainedValue() as String!
+    }()
     
 }
 

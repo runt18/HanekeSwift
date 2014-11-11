@@ -9,6 +9,34 @@
 import Foundation
 
 extension String {
+    
+    func trimmed(_ string: String? = nil, fromEnd: Bool = false) -> String {
+        let characterSet = string.map { NSCharacterSet(charactersInString: $0) } ?? NSCharacterSet.whitespaceAndNewlineCharacterSet()
+        let backwards: NSStringCompareOptions = fromEnd ? .BackwardsSearch : nil
+        if let range = rangeOfCharacterFromSet(characterSet, options: .AnchoredSearch | backwards) {
+            return self[range]
+        }
+        return self
+    }
+    
+}
+
+extension String.UnicodeScalarView {
+    
+    func truncate(UTF16Length maxLength: Int, originalLength: Int) -> String {
+        var utf16 = originalLength
+        var endIndex = self.endIndex
+        while utf16 > maxLength {
+            endIndex = endIndex.predecessor()
+            utf16 -= UTF16.width(self[endIndex])
+        }
+        let retScalars = self[startIndex..<endIndex]
+        return String(retScalars).trimmed(fromEnd: true)
+    }
+    
+}
+
+extension String {
 
     private struct Filename {
         static let allowedCharacters: NSCharacterSet = {
@@ -17,35 +45,26 @@ extension String {
             return charSet.invertedSet
         }()
     }
-
+    
     var hnk_escapedFilename: String {
         return stringByAddingPercentEncodingWithAllowedCharacters(Filename.allowedCharacters) ?? self
     }
     
-    func MD5String() -> String {
-        if let data = self.dataUsingEncoding(NSUTF8StringEncoding) {
-            let MD5Calculator = MD5(data)
-            let MD5Data = MD5Calculator.calculate()
-            let resultBytes = UnsafeMutablePointer<CUnsignedChar>(MD5Data.bytes)
-            let resultEnumerator = UnsafeBufferPointer<CUnsignedChar>(start: resultBytes, count: MD5Data.length)
-            let MD5String = NSMutableString()
-            for c in resultEnumerator {
-                MD5String.appendFormat("%02x", c)
-            }
-            return MD5String
-        } else {
+    var hnk_truncatedFilename: String {
+        let max = Int(NAME_MAX)
+        var count = utf16Count
+        if count <= max {
             return self
         }
+        
+        let ext = pathExtension
+        let name = stringByDeletingPathExtension
+        let newName = name.unicodeScalars.truncate(UTF16Length: max, originalLength: count)
+        return newName.stringByAppendingPathExtension(ext)!
     }
     
-    func MD5Filename() -> String {
-        let MD5String = self.MD5String()
-        let pathExtension = self.pathExtension
-        if countElements(pathExtension) > 0 {
-            return MD5String.stringByAppendingPathExtension(pathExtension) ?? MD5String
-        } else {
-            return MD5String
-        }
+    var hnk_filename: String {
+        return hnk_escapedFilename.hnk_truncatedFilename
     }
 
 }

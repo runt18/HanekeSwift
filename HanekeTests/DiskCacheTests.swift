@@ -419,10 +419,15 @@ class DiskCacheTests: DiskTestCase {
     }
     
     func testPathForKey_WithLongKey() {
-        let key = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam pretium id nibh a pulvinar. Integer id ex in tellus egestas placerat. Praesent ultricies libero ligula, et convallis ligula imperdiet eu. Sed gravida, turpis sed vulputate feugiat, metus nisl scelerisque diam, ac aliquet metus nisi rutrum ipsum. Nulla vulputate pretium dolor, a pellentesque nulla. Nunc pellentesque tortor porttitor, sollicitudin leo in, sollicitudin ligula. Cras malesuada orci at neque interdum elementum. Integer sed sagittis diam. Mauris non elit sed augue consequat feugiat. Nullam volutpat tortor eget tempus pretium. Sed pharetra sem vitae diam hendrerit, sit amet dapibus arcu interdum. Fusce egestas quam libero, ut efficitur turpis placerat eu. Sed velit sapien, aliquam sit amet ultricies a, bibendum ac nibh. Maecenas imperdiet, quam quis tincidunt sollicitudin, nunc tellus ornare ipsum, nec rhoncus nunc nisi a lacus."
-        let expectedURL = sut.URL.URLByAppendingPathComponent(key.MD5Filename(), isDirectory: false)
+        let key = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ante odio. Quisque nisi lectus, hendrerit sed lorem vitae, cursus egestas eros. Aenean at fermentum quam. Ut tristique leo ante, sed egestas ex cursus quis. Curabitur lacinia cras amet 🎩.hnk"
+
+        let filename = key.hnk_filename
+        let expectedFilename = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ante odio. Quisque nisi lectus, hendrerit sed lorem vitae, cursus egestas eros. Aenean at fermentum quam. Ut tristique leo ante, sed egestas ex cursus quis. Curabitur lacinia cras amet.foo"
+        XCTAssertEqual(filename, expectedFilename)
         
-        XCTAssertEqual(sut.URLForKey(key), expectedURL)
+        let URL = sut.URLForKey(key)
+        let expectedURL = sut.URL.URLByAppendingPathComponent(key.hnk_filename, isDirectory: false)
+        XCTAssertEqual(URL, expectedURL)
     }
 
 }

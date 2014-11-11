@@ -127,7 +127,7 @@ public class DiskCache {
     }
 
     func URLForKey(key: String) -> NSURL {
-        let filename = key.utf16Count > Int(NAME_MAX) ? key.MD5Filename() : key.hnk_escapedFilename
+        let filename = key.hnk_filename
         let itemURL = URL.URLByAppendingPathComponent(filename, isDirectory: false)
         return itemURL
     }

@@ -189,7 +189,7 @@ class CacheTests: XCTestCase {
                 expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(1, nil)
+        self.waitForExpectationsWithTimeout(3, nil)
     }
     
     func testFetch_AfterClearingMemoryCache_WithKeyAndFormatWithDiskCapacity_ExpectSuccess() {
@@ -208,7 +208,7 @@ class CacheTests: XCTestCase {
                 expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(1, nil)
+        self.waitForExpectationsWithTimeout(3, nil)
     }
     
     func testFetchOnSuccess_WithSyncFetcher_ExpectAsyncSuccess () {
@@ -439,7 +439,7 @@ class CacheTests: XCTestCase {
             XCTFail("expected failure")
             expectation.fulfill()
         }
-        self.waitForExpectationsWithTimeout(1, nil)
+        self.waitForExpectationsWithTimeout(4, nil)
     }
     
     func testRemoveAll_AfterNone() {

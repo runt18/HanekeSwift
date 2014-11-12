@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Haneke. All rights reserved.
 //
 
-import Foundation
 import XCTest
+import Haneke
 
 class FetchTests : XCTestCase {
     

@@ -6,10 +6,11 @@
 //  Copyright (c) 2014 Haneke. All rights reserved.
 //
 
-import UIKit
 import XCTest
+import UIKit
 import ImageIO
 import MobileCoreServices
+import Haneke
 
 enum ExifOrientation : UInt32 {
     case Up = 1

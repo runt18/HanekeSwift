@@ -6,9 +6,9 @@
 //  Copyright (c) 2014 Haneke. All rights reserved.
 //
 
-import Foundation
-import UIKit
 import XCTest
+import UIKit
+import Haneke
 
 class CacheTests: XCTestCase {
     

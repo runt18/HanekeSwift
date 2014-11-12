@@ -9,11 +9,11 @@
 import UIKit
 import MobileCoreServices
 
-protocol ErrorRepresentable: RawRepresentable {
+public protocol ErrorRepresentable: RawRepresentable {
     class var domain: String { get }
 }
 
-func errorWithCode<T: ErrorRepresentable where T.RawValue == Int>(code: T, description : String? = nil) -> NSError {
+public func errorWithCode<T: ErrorRepresentable where T.RawValue == Int>(code: T, description : String? = nil) -> NSError {
     var userInfo = [NSObject: AnyObject]()
     if let description = description {
         userInfo[NSLocalizedDescriptionKey] = description
@@ -21,7 +21,7 @@ func errorWithCode<T: ErrorRepresentable where T.RawValue == Int>(code: T, descr
     return NSError(domain: code.dynamicType.domain, code: code.rawValue, userInfo: userInfo)
 }
 
-func ==(lhs: NSError?, rhs: (domain: String, code: Int)) -> Bool {
+public func ==(lhs: NSError?, rhs: (domain: String, code: Int)) -> Bool {
     if let error = lhs {
         if error.domain != rhs.domain { return false }
         if error.code != rhs.code { return false }
@@ -30,7 +30,7 @@ func ==(lhs: NSError?, rhs: (domain: String, code: Int)) -> Bool {
     return false
 }
 
-func ==<T: ErrorRepresentable where T.RawValue == Int>(lhs: NSError?, rhs: T) -> Bool {
+public func ==<T: ErrorRepresentable where T.RawValue == Int>(lhs: NSError?, rhs: T) -> Bool {
     return lhs == (rhs.dynamicType.domain, rhs.rawValue)
 }
 

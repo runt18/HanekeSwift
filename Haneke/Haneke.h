@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Haneke. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for Haneke.
 FOUNDATION_EXPORT double HanekeVersionNumber;
@@ -15,5 +15,3 @@ FOUNDATION_EXPORT double HanekeVersionNumber;
 FOUNDATION_EXPORT const unsigned char HanekeVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <Haneke/PublicHeader.h>
-
-

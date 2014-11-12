@@ -32,7 +32,7 @@ public struct Format<T> {
         return transformed
     }
     
-    var isIdentity : Bool {
+    public var isIdentity : Bool {
         return self.transform == nil
     }
 

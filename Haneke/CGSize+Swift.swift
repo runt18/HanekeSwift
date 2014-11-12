@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension CGSize {
+public extension CGSize {
 
     func hnk_aspectFillSize(size: CGSize) -> CGSize {
         let scaleWidth = size.width / self.width

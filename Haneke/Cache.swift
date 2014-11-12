@@ -19,7 +19,7 @@ extension Haneke {
             case ObjectNotFound = -100
             case FormatNotFound = -101
 
-            static var domain: String {
+            public static var domain: String {
                 return Haneke.Domain
             }
         }
@@ -30,9 +30,9 @@ extension Haneke {
 
 public class Cache<T : DataConvertible> {
     
-    let name : String
+    public let name : String
     
-    let memoryWarningObserver : NSObjectProtocol!
+    private let memoryWarningObserver : NSObjectProtocol!
     
     public init(name : String) {
         self.name = name
@@ -134,7 +134,7 @@ public class Cache<T : DataConvertible> {
     
     // MARK: Notifications
     
-    func onMemoryWarning() {
+    public func onMemoryWarning() {
         for (_, (_, memoryCache, _)) in self.formats {
             memoryCache.removeAllObjects()
         }

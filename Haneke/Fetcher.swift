@@ -11,31 +11,29 @@ import UIKit
 // See: http://stackoverflow.com/questions/25915306/generic-closure-in-protocol
 public class Fetcher<T : DataConvertible> {
 
-    let key : String
+    public let key : String
     
-    init(key : String) {
+    public init(key : String) {
         self.key = key
     }
     
-    func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {}
+    public func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {}
     
-    func cancelFetch() {}
+    public func cancelFetch() {}
 }
 
-class SimpleFetcher<T : DataConvertible>: Fetcher<T> {
+public class SimpleFetcher<T : DataConvertible>: Fetcher<T> {
     
-    let getValue : () -> T
+    public let getValue : () -> T
     
-    init(key : String, value getValue : @autoclosure () -> T) {
+    public init(key : String, value getValue : @autoclosure () -> T) {
         self.getValue = getValue
         super.init(key: key)
     }
     
-    override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
+    public override func fetch(failure fail : ((NSError?) -> ()), success succeed : (T) -> ()) {
         let value = getValue()
         succeed(value)
     }
-    
-    override func cancelFetch() {}
     
 }

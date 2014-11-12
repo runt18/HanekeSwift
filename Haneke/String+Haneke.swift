@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension String {
+private extension String {
     
     func trimmed(_ string: String? = nil, fromEnd: Bool = false) -> String {
         let characterSet = string.map { NSCharacterSet(charactersInString: $0) } ?? NSCharacterSet.whitespaceAndNewlineCharacterSet()
@@ -21,7 +21,7 @@ extension String {
     
 }
 
-extension String.UnicodeScalarView {
+private extension String.UnicodeScalarView {
     
     func truncate(UTF16Length maxLength: Int, originalLength: Int) -> String {
         var utf16 = originalLength
@@ -36,7 +36,7 @@ extension String.UnicodeScalarView {
     
 }
 
-extension String {
+public extension String {
 
     private struct Filename {
         static let allowedCharacters: NSCharacterSet = {

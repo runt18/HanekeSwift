@@ -22,7 +22,7 @@ public func sorted<C: SequenceType, T: AnyObject where C.Generator.Element == NS
     }
 }
 
-extension NSFileManager {
+public extension NSFileManager {
 
     public struct Utilities {
 

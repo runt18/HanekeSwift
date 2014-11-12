@@ -18,7 +18,7 @@ extension UIImage {
         return resizedImage
     }
 
-    func hnk_hasAlpha() -> Bool {
+    public func hnk_hasAlpha() -> Bool {
         let alpha = CGImageGetAlphaInfo(self.CGImage)
         switch alpha {
         case .First, .Last, .PremultipliedFirst, .PremultipliedLast, .Only:
@@ -28,13 +28,13 @@ extension UIImage {
         }
     }
     
-    func hnk_data(compressionQuality: Float = 1.0) -> NSData! {
+    public func hnk_data(compressionQuality: Float = 1.0) -> NSData! {
         let hasAlpha = self.hnk_hasAlpha()
         let data = hasAlpha ? UIImagePNGRepresentation(self) : UIImageJPEGRepresentation(self, CGFloat(compressionQuality))
         return data
     }
     
-    func hnk_decompressedImage() -> UIImage! {
+    public func hnk_decompressedImage() -> UIImage! {
         let originalImageRef = self.CGImage
         let originalBitmapInfo = CGImageGetBitmapInfo(originalImageRef)
         let alphaInfo = CGImageGetAlphaInfo(originalImageRef)

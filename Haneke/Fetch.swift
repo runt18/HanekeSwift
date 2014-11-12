@@ -30,7 +30,7 @@ public class Fetch<T> {
     private var state : FetchState<T> = FetchState.Pending
     
     public init() {}
-    
+
     public func onSuccess(onSuccess : Succeeder) -> Self {
         self.onSuccess = onSuccess
         switch self.state {
@@ -53,17 +53,17 @@ public class Fetch<T> {
         return self
     }
     
-    func succeed(value : T) {
+    public func succeed(value : T) {
         self.state = FetchState.Success(Wrapper(value))
         self.onSuccess?(value)
     }
     
-    func fail(_ error : NSError? = nil) {
+    public func fail(_ error : NSError? = nil) {
         self.state = FetchState.Failure(error)
         self.onFailure?(error)
     }
     
-    var hasFailed : Bool {
+    public var hasFailed : Bool {
         switch self.state {
         case FetchState.Failure(_):
             return true
@@ -72,7 +72,7 @@ public class Fetch<T> {
             }
     }
     
-    var hasSucceeded : Bool {
+    public var hasSucceeded : Bool {
         switch self.state {
         case FetchState.Success(_):
             return true

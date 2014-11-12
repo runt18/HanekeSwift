@@ -126,7 +126,7 @@ public class DiskCache {
         })
     }
 
-    func URLForKey(key: String) -> NSURL {
+    public func URLForKey(key: String) -> NSURL {
         let filename = key.hnk_filename
         let itemURL = URL.URLByAppendingPathComponent(filename, isDirectory: false)
         return itemURL

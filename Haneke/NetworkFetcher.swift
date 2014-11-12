@@ -18,7 +18,7 @@ extension Haneke {
             case MissingData = -401
             case InvalidStatusCode = -402
 
-            static var domain: String {
+            public static var domain: String {
                 return Haneke.Domain + ".network"
             }
         }
@@ -29,7 +29,7 @@ extension Haneke {
 
 public class NetworkFetcher<T : DataConvertible> : Fetcher<T> {
     
-    let URL : NSURL
+    public let URL : NSURL
     
     public init(URL : NSURL) {
         self.URL = URL

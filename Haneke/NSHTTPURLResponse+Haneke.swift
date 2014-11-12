@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension NSHTTPURLResponse {
+public extension NSHTTPURLResponse {
     
     func hnk_validateLengthOfData(data : NSData) -> Bool {
         let expectedContentLength = self.expectedContentLength

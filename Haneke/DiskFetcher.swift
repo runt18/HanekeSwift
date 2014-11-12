@@ -16,7 +16,7 @@ extension Haneke {
         public enum ErrorCode : Int, ErrorRepresentable {
             case InvalidData = -500
 
-            static var domain: String {
+            public static var domain: String {
                 return Haneke.Domain + ".disk"
             }
         }
@@ -27,8 +27,8 @@ extension Haneke {
 
 public class DiskFetcher<T : DataConvertible> : Fetcher<T> {
     
-    let URL: NSURL
-    var cancelled = false
+    public let URL: NSURL
+    private var cancelled = false
     
     public init(URL: NSURL) {
         self.URL = URL

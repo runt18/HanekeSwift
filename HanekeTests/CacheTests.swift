@@ -27,8 +27,6 @@ class CacheTests: XCTestCase {
     func testInit() {
         let name = "name"
         let sut = Cache<NSData>(name: name)
-        
-        XCTAssertNotNil(sut.memoryWarningObserver)
         XCTAssertEqual(name, sut.name)
     }
     

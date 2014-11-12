@@ -9,13 +9,17 @@
 import XCTest
 import Haneke
 
+struct Tests {
+    static let Domain = "io.haneke.tests"
+}
+
 class HanekeTests: XCTestCase {
 
     enum TestError: Int, ErrorRepresentable {
         case Test = 200
 
         static var domain: String {
-            return Haneke.Domain + ".tests"
+            return "io.haneke.tests"
         }
     }
 

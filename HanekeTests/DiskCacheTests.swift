@@ -30,23 +30,6 @@ class DiskCacheTests: DiskTestCase {
         sut = DiskCache(URL: directoryURL, capacity: capacity, fileManager: fileManager)
     }
 
-    // MARK: baseURL
-
-    func testBaseURL() {
-        let cachesPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-        let basePath = cachesPath.stringByAppendingPathComponent(Haneke.Domain)
-        let expectedBaseURL = NSURL.fileURLWithPath(basePath, isDirectory: true)
-        XCTAssertEqual(DiskCache.baseURL(fileManager: fileManager), expectedBaseURL!)
-    }
-    
-    // MARK: cacheURL
-
-    func testCacheURL() {
-        let expectedCacheURL = DiskCache.baseURL(fileManager: fileManager).URLByAppendingPathComponent(name, isDirectory: true)
-        let cacheURL = DiskCache.cacheURL(fileManager: fileManager, name: name)
-        XCTAssertEqual(cacheURL, expectedCacheURL)
-    }
-
     // MARK: -
 
     func testInit() {

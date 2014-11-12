@@ -14,7 +14,7 @@ enum ImageViewTestError: Int, ErrorRepresentable {
     case Test = 0
 
     static var domain: String {
-        return Haneke.Domain + ".imageView"
+        return Tests.Domain + ".imageView"
     }
 }
 
@@ -123,7 +123,6 @@ class UIImageView_HanekeTests: DiskTestCase {
         let format = sut.hnk_format
         
         XCTAssertEqual(format.diskCapacity, Haneke.UIKitGlobals.DefaultFormat.DiskCapacity)
-        XCTAssertTrue(cache.formats[format.name] != nil) // Can't use XCTAssertNotNil because it expects AnyObject
         let result = format.apply(image)
         let expected = resizer.resizeImage(image)
         XCTAssertTrue(result.isEqualPixelByPixel(expected))

@@ -23,7 +23,7 @@ class String_HanekeTests: XCTestCase {
     }
     
     func testTruncatedFilename() {
-        let key = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ante odio. Quisque nisi lectus, hendrerit sed lorem vitae, cursus egestas eros. Aenean at fermentum quam. Ut tristique leo ante, sed egestas ex cursus quis. Curabitur lacinia cras amet 🎩.hnk"
+        let key = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ante odio. Quisque nisi lectus, hendrerit sed lorem vitae, cursus egestas eros. Aenean at fermentum quam. Ut tristique leo ante, sed egestas ex cursus quis. Curabitur lacinia cras amet 🎩.foo"
         let filename = key.hnk_filename
         let expectedFilename = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ante odio. Quisque nisi lectus, hendrerit sed lorem vitae, cursus egestas eros. Aenean at fermentum quam. Ut tristique leo ante, sed egestas ex cursus quis. Curabitur lacinia cras amet.foo"
         XCTAssertEqual(filename, expectedFilename)

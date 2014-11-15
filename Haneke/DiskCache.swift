@@ -38,7 +38,7 @@ public class DiskCache {
     }
 
     private lazy var cacheQueue : dispatch_queue_t = {
-        let queueName = Haneke.Domain + "." + self.URL.lastPathComponent
+        let queueName = Haneke.Domain + "." + self.URL.lastPathComponent!
         let queueAttr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_UTILITY, 0)
         let queue = dispatch_queue_create(queueName, queueAttr)
         return queue
